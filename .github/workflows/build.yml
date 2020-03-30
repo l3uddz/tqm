@@ -77,7 +77,7 @@ jobs:
       - name: publish
         if: startsWith(github.ref, 'refs/tags/')
         env:
-          TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REF: ${{ github.ref }}
         run: |
           make publish
