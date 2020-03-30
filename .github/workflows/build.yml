@@ -66,19 +66,11 @@ jobs:
         run: |
           make snapshot
 
-      # get tag name
-      - name: tag_name
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: olegtarasov/get-tag@v2
-        with:
-          tagRegex: "v?(.+)"
-
       # publish
       - name: publish
         if: startsWith(github.ref, 'refs/tags/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GITHUB_REF: ${{ github.ref }}
         run: |
           make publish
 
@@ -95,8 +87,8 @@ jobs:
           name: build_darwin
           path: dist/*darwin*.tar.gz
 
-#      - name: artifact_windows
-#        uses: actions/upload-artifact@v2-preview
-#        with:
-#          name: build_windows
-#          path: dist/*windows*.zip
+      - name: artifact_windows
+        uses: actions/upload-artifact@v2-preview
+        with:
+          name: build_windows
+          path: dist/*windows*.zip
