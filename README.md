@@ -64,7 +64,7 @@ filters:
 
 ## Example Commands
 
-1. Manage - (Retrieve torrent client queue and run against configured filters)
+1. Manage - Retrieve torrent client queue and run against configured filters
 
 `tqm manage deluge --dry-run`
 
@@ -74,7 +74,7 @@ filters:
 
 `tqm manage qbt`
 
-2. Orphan - (Retrieve torrent client queue and local files/folders in download_path, remove orphan files/folders)
+2. Orphan - Retrieve torrent client queue and local files/folders in download_path, remove orphan files/folders
 
 `tqm orphan deluge --dry-run`
 
@@ -93,5 +93,7 @@ If you find this project helpful, feel free to make a small donation to the deve
   - [Monzo](https://monzo.me/today): Credit Cards, Apple Pay, Google Pay
 
   - [Paypal: l3uddz@gmail.com](https://www.paypal.me/l3uddz)
+  
+  - [GitHub Sponsor](https://github.com/sponsors/l3uddz): GitHub matches contributions for first 12 months.
 
   - BTC: 3CiHME1HZQsNNcDL6BArG7PbZLa8zUUgjL
