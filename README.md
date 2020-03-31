@@ -39,13 +39,13 @@ filters:
   default:
     ignore:
       # general
-      - Downloaded == false && not (TrackerStatus contains "Unregistered torrent" || TrackerStatus contains "Torrent is not authorized for use on this tracker" || TrackerStatus contains "Torrent is not found" || TrackerStatus contains "not registered with this tracker" || TrackerStatus contains "Torrent not found" || TrackerStatus contains "unregistered torrent")
-      - SeedingHours < 26 && not (TrackerStatus contains "Unregistered torrent" || TrackerStatus contains "Torrent is not authorized for use on this tracker" || TrackerStatus contains "Torrent is not found" || TrackerStatus contains "not registered with this tracker" || TrackerStatus contains "Torrent not found" || TrackerStatus contains "unregistered torrent")
+      - Downloaded == false && !IsUnregistered()
+      - SeedingHours < 26 && !IsUnregistered()
       # permaseed / un-sorted (unless torrent has been deleted)
-      - Label in ["permaseed-mine", "permaseed-btn", "permaseed-hdb", "permaseed-ptp", "permaseed-bhd", "permaseed-nbl", "permaseed-ufc", "radarr", "sonarr", "lidarr"] && not (TrackerStatus contains "Unregistered torrent" || TrackerStatus contains "Torrent is not authorized for use on this tracker" || TrackerStatus contains "Torrent is not found" || TrackerStatus contains "not registered with this tracker" || TrackerStatus contains "Torrent not found" || TrackerStatus contains "unregistered torrent")
+      - Label in ["permaseed-mine", "permaseed-btn", "permaseed-hdb", "permaseed-ptp", "permaseed-bhd", "permaseed-nbl", "permaseed-ufc", "radarr", "sonarr", "lidarr"] && !IsUnregistered()
     remove:
       # general
-      - TrackerStatus contains "Unregistered torrent" || TrackerStatus contains "Torrent is not authorized for use on this tracker" || TrackerStatus contains "Torrent is not found" || TrackerStatus contains "not registered with this tracker" || TrackerStatus contains "Torrent not found" || TrackerStatus contains "unregistered torrent"
+      - IsUnregistered()
       # imported
       - Label in ["sonarr-imported"] && (Ratio > 4.0 || SeedingDays >= 15.0)
       # ipt
