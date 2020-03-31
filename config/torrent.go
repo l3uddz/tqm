@@ -1,5 +1,18 @@
 package config
 
+import "strings"
+
+var (
+	unregisteredStatuses = []string{
+		"unregistered torrent",
+		"torrent is not authorized for use on this tracker",
+		"torrent is not found",
+		"not registered with this tracker",
+		"torrent not found",
+		"unregistered torrent",
+	}
+)
+
 type Torrent struct {
 	// torrent
 	Hash            string
@@ -25,4 +38,15 @@ type Torrent struct {
 	// tracker
 	TrackerName   string
 	TrackerStatus string
+}
+
+func (t *Torrent) IsUnregistered() bool {
+	for _, v := range unregisteredStatuses {
+		// unregistered tracker status found?
+		if strings.Contains(strings.ToLower(t.TrackerStatus), v) {
+			return true
+		}
+	}
+
+	return false
 }
