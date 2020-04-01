@@ -27,6 +27,10 @@ type QBittorrent struct {
 	clientType string
 	client     *qbt.Client
 
+	// set by cmd handler
+	freeSpaceGB  float64
+	freeSpaceSet bool
+
 	// internal compiled filters
 	ignoresExpr []*vm.Program
 	removesExpr []*vm.Program
@@ -162,8 +166,12 @@ func (c *QBittorrent) GetTorrents() (map[string]config.Torrent, error) {
 			Label:           t.Category,
 			Seeds:           td.SeedsTotal,
 			Peers:           td.PeersTotal,
-			TrackerName:     trackerName,
-			TrackerStatus:   trackerStatus,
+			// free space
+			FreeSpaceGB:  c.freeSpaceGB,
+			FreeSpaceSet: c.freeSpaceSet,
+			// tracker
+			TrackerName:   trackerName,
+			TrackerStatus: trackerStatus,
 		}
 
 		torrents[t.Hash] = torrent
@@ -190,6 +198,14 @@ func (c *QBittorrent) RemoveTorrent(hash string, deleteData bool) (bool, error) 
 
 	// remove
 	return c.client.Delete([]string{hash}, deleteData)
+}
+
+func (c *QBittorrent) GetCurrentFreeSpace(path string) (int64, error) {
+	return 0, errors.New("client does not support free disk space retrieval")
+}
+
+func (c *QBittorrent) GetFreeSpace() float64 {
+	return c.freeSpaceGB
 }
 
 /* Filters */

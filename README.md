@@ -17,6 +17,7 @@ clients:
     enabled: true
     filter: default
     download_path: /mnt/local/downloads/torrents/deluge
+    free_space_path: /mnt/local/downloads/torrents/deluge
     download_path_mapping:
       /downloads/torrents/deluge: /mnt/local/downloads/torrents/deluge
     host: localhost
@@ -41,6 +42,8 @@ filters:
       # general
       - Downloaded == false && !IsUnregistered()
       - SeedingHours < 26 && !IsUnregistered()
+      # misc
+      - FreeSpaceSet && FreeSpaceGB > 2048 && !IsUnregistered()
       # permaseed / un-sorted (unless torrent has been deleted)
       - Label in ["permaseed-mine", "permaseed-btn", "permaseed-hdb", "permaseed-ptp", "permaseed-bhd", "permaseed-nbl", "permaseed-ufc", "radarr", "sonarr", "lidarr"] && !IsUnregistered()
     remove:
@@ -85,6 +88,13 @@ filters:
 `tqm orphan qbt`
 
 ***
+
+## Notes
+
+`FreeSpaceSet` and `FreeSpaceGB` are currently only supported for the following clients (when `free_space_path` is set):
+
+- [x] Deluge
+- [ ] qBittorrent
 
 # Donate
 

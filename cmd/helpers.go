@@ -63,7 +63,7 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 		if uniqueTorrent := tfm.IsUnique(t); uniqueTorrent {
 			// hard remove (the file paths in this torrent are unique to this torrent only)
 			log.Info("-----")
-			log.Infof("Hard removing: %q - %s", t.Name, humanize.Bytes(uint64(t.DownloadedBytes)))
+			log.Infof("Hard removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
 			log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / Tracker Status: %q",
 				t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
 
@@ -100,7 +100,7 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 		} else {
 			// soft remove (there are other torrents with identical file paths)
 			log.Info("-----")
-			log.Warnf("Soft removing: %q - %s", t.Name, humanize.Bytes(uint64(t.DownloadedBytes)))
+			log.Warnf("Soft removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
 			log.Warnf("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / Tracker Status: %q",
 				t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
 
@@ -137,7 +137,7 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 
 	// show result
 	log.Info("-----")
-	log.WithField("reclaimed_space", humanize.Bytes(uint64(removedTorrentBytes))).
+	log.WithField("reclaimed_space", humanize.IBytes(uint64(removedTorrentBytes))).
 		Infof("Removed torrents: %d hard, %d soft and %d failures",
 			hardRemoveTorrents, softRemoveTorrents, errorRemoveTorrents)
 	return nil

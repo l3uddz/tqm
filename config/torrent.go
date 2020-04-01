@@ -35,6 +35,10 @@ type Torrent struct {
 	Seeds           int64
 	Peers           int64
 
+	// set by client on GetCurrentFreeSpace
+	FreeSpaceGB  float64
+	FreeSpaceSet bool
+
 	// tracker
 	TrackerName   string
 	TrackerStatus string
