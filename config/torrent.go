@@ -41,9 +41,14 @@ type Torrent struct {
 }
 
 func (t *Torrent) IsUnregistered() bool {
+	if t.TrackerStatus == "" {
+		return false
+	}
+
+	status := strings.ToLower(t.TrackerStatus)
 	for _, v := range unregisteredStatuses {
 		// unregistered tracker status found?
-		if strings.Contains(strings.ToLower(t.TrackerStatus), v) {
+		if strings.Contains(status, v) {
 			return true
 		}
 	}
