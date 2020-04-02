@@ -38,13 +38,13 @@ var orphanCmd = &cobra.Command{
 		}
 
 		// retrieve client type
-		clientType, err := getClientType(clientConfig)
+		clientType, err := getClientConfigString("type", clientConfig)
 		if err != nil {
 			log.WithError(err).Fatal("Failed determining client type")
 		}
 
 		// retrieve client download path
-		clientDownloadPath, err := getClientDownloadPath(clientConfig)
+		clientDownloadPath, err := getClientConfigString("download_path", clientConfig)
 		if err != nil {
 			log.WithError(err).Fatal("Failed determining client download path")
 		} else if clientDownloadPath == nil || *clientDownloadPath == "" {
@@ -181,7 +181,7 @@ var orphanCmd = &cobra.Command{
 		}
 
 		log.Info("-----")
-		log.WithField("reclaimed_space", humanize.Bytes(removedLocalFilesSize)).
+		log.WithField("reclaimed_space", humanize.IBytes(removedLocalFilesSize)).
 			Infof("Removed orphans: %d files, %d folders and %d failures",
 				removedLocalFiles, removedLocalFolders, removeFailures)
 	},

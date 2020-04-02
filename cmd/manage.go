@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/dustin/go-humanize"
 	"github.com/l3uddz/tqm/client"
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/logger"
@@ -34,10 +35,13 @@ var manageCmd = &cobra.Command{
 		}
 
 		// retrieve client type
-		clientType, err := getClientType(clientConfig)
+		clientType, err := getClientConfigString("type", clientConfig)
 		if err != nil {
 			log.WithError(err).Fatal("Failed determining client type")
 		}
+
+		// retrieve client free space path
+		clientFreeSpacePath, _ := getClientConfigString("free_space_path", clientConfig)
 
 		// retrieve client filters
 		clientFilter, err := getClientFilter(clientConfig)
@@ -64,6 +68,17 @@ var manageCmd = &cobra.Command{
 			log.WithError(err).Fatal("Failed connecting")
 		} else {
 			log.Debugf("Connected to client")
+		}
+
+		// get free disk space (can/will be used by filters)
+		if clientFreeSpacePath != nil {
+			space, err := c.GetCurrentFreeSpace(*clientFreeSpacePath)
+			if err != nil {
+				log.WithError(err).Warnf("Failed retrieving free-space for: %q", *clientFreeSpacePath)
+			} else {
+				log.Infof("Retrieved free-space for %q: %v (%.2f GB)", *clientFreeSpacePath,
+					humanize.IBytes(uint64(space)), c.GetFreeSpace())
+			}
 		}
 
 		// retrieve torrents

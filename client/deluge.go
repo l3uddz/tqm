@@ -2,6 +2,7 @@ package client
 
 import (
 	"fmt"
+	"github.com/dustin/go-humanize"
 	"path"
 	"time"
 
@@ -29,6 +30,10 @@ type Deluge struct {
 	client     *delugeclient.LabelPlugin
 	client1    *delugeclient.Client
 	client2    *delugeclient.ClientV2
+
+	// set by cmd handler
+	freeSpaceGB  float64
+	freeSpaceSet bool
 
 	// internal compiled filters
 	ignoresExpr []*vm.Program
@@ -168,6 +173,9 @@ func (c *Deluge) GetTorrents() (map[string]config.Torrent, error) {
 			Label:           label,
 			Seeds:           t.TotalSeeds,
 			Peers:           t.TotalPeers,
+			// free space
+			FreeSpaceGB:  c.freeSpaceGB,
+			FreeSpaceSet: c.freeSpaceSet,
 			// tracker
 			TrackerName:   t.TrackerHost,
 			TrackerStatus: t.TrackerStatus,
@@ -197,6 +205,24 @@ func (c *Deluge) RemoveTorrent(hash string, deleteData bool) (bool, error) {
 
 	// remove
 	return c.client.RemoveTorrent(hash, deleteData)
+}
+
+func (c *Deluge) GetCurrentFreeSpace(path string) (int64, error) {
+	// get free disk space
+	space, err := c.client.GetFreeSpace(path)
+	if err != nil {
+		return 0, errors.Wrapf(err, "failed retrieving free disk space for: %q", path)
+	}
+
+	// set internal free size
+	c.freeSpaceGB = float64(space) / humanize.GiByte
+	c.freeSpaceSet = true
+
+	return space, nil
+}
+
+func (c *Deluge) GetFreeSpace() float64 {
+	return c.freeSpaceGB
 }
 
 /* Filters */

@@ -104,32 +104,18 @@ func validateClientEnabled(clientConfig map[string]interface{}) error {
 	return nil
 }
 
-func getClientType(clientConfig map[string]interface{}) (*string, error) {
-	v, ok := clientConfig["type"]
+func getClientConfigString(setting string, clientConfig map[string]interface{}) (*string, error) {
+	v, ok := clientConfig[setting]
 	if !ok {
-		return nil, fmt.Errorf("no type setting found in client configuration: %+v", clientConfig)
+		return nil, fmt.Errorf("no %q setting found in client configuration: %+v", setting, clientConfig)
 	}
 
-	clientType, ok := v.(string)
+	value, ok := v.(string)
 	if !ok {
-		return nil, fmt.Errorf("failed type-asserting type of client: %#v", v)
+		return nil, fmt.Errorf("failed type-asserting %q of client: %#v", setting, v)
 	}
 
-	return &clientType, nil
-}
-
-func getClientDownloadPath(clientConfig map[string]interface{}) (*string, error) {
-	v, ok := clientConfig["download_path"]
-	if !ok {
-		return nil, fmt.Errorf("no download_path setting found in client configuration: %+v", clientConfig)
-	}
-
-	clientDownloadPath, ok := v.(string)
-	if !ok {
-		return nil, fmt.Errorf("failed type-asserting download_path of client: %#v", v)
-	}
-
-	return &clientDownloadPath, nil
+	return &value, nil
 }
 
 func getClientDownloadPathMapping(clientConfig map[string]interface{}) (map[string]string, error) {

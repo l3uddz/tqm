@@ -99,13 +99,15 @@ func setConfigDefaults(check bool) error {
 	added += setConfigDefault("clients", map[string]interface{}{
 		"deluge": map[string]interface{}{
 			// non struct mapped
-			"enabled":       false,
-			"type":          "deluge",
-			"filter":        "default",
-			"download_path": "/mnt/local/downloads/torrents/deluge",
+			"enabled":         false,
+			"type":            "deluge",
+			"filter":          "default",
+			"download_path":   "/mnt/local/downloads/torrents/deluge",
+			"free_space_path": "/mnt/local/downloads/torrents/deluge",
 			"download_path_mapping": map[string]string{
 				"/downloads/torrents/deluge": "/mnt/local/downloads/torrents/deluge",
 			},
+
 			// mapped to client struct
 			"host":     "localhost",
 			"port":     58846,

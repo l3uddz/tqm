@@ -35,15 +35,24 @@ type Torrent struct {
 	Seeds           int64
 	Peers           int64
 
+	// set by client on GetCurrentFreeSpace
+	FreeSpaceGB  float64
+	FreeSpaceSet bool
+
 	// tracker
 	TrackerName   string
 	TrackerStatus string
 }
 
 func (t *Torrent) IsUnregistered() bool {
+	if t.TrackerStatus == "" {
+		return false
+	}
+
+	status := strings.ToLower(t.TrackerStatus)
 	for _, v := range unregisteredStatuses {
 		// unregistered tracker status found?
-		if strings.Contains(strings.ToLower(t.TrackerStatus), v) {
+		if strings.Contains(status, v) {
 			return true
 		}
 	}
