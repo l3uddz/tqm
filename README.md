@@ -96,6 +96,10 @@ filters:
 - [x] Deluge
 - [ ] qBittorrent
 
+`FreeSpaceGB` will only be set **once** before torrents are evaluated against the chosen filter. 
+
+This means as torrents are removed, `FreeSpaceGB` will not change.
+
 # Donate
 
 If you find this project helpful, feel free to make a small donation to the developer:
