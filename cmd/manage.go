@@ -74,7 +74,7 @@ var manageCmd = &cobra.Command{
 		if clientFreeSpacePath != nil {
 			space, err := c.GetCurrentFreeSpace(*clientFreeSpacePath)
 			if err != nil {
-				log.WithError(err).Warnf("Failed retrieving available disk space for: %q", *clientFreeSpacePath)
+				log.WithError(err).Warnf("Failed retrieving available free-space for: %q", *clientFreeSpacePath)
 			} else {
 				log.Infof("Retrieved free-space for %q: %v (%.2f GB)", *clientFreeSpacePath,
 					humanize.IBytes(uint64(space)), c.GetFreeSpace())
