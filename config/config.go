@@ -150,7 +150,7 @@ func setConfigDefaults(check bool) error {
 		}
 
 		// notify
-		log.Info("Configuration was saved with new options!")
+		log.Infof("Configuration saved: %q", cfgPath)
 		log.Logger.Exit(0)
 	}
 
