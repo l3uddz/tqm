@@ -24,7 +24,7 @@ require (
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v0.0.7
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
-	github.com/spf13/viper v1.6.2
+	github.com/spf13/viper v1.6.3
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	golang.org/x/crypto v0.0.0-20200323165209-0ec3e9974c59 // indirect
