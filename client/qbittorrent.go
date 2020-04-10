@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/antonmedv/expr"
 	"github.com/antonmedv/expr/vm"
+	"github.com/dustin/go-humanize"
 	"github.com/l3uddz/go-qbittorrent/qbt"
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/logger"
@@ -201,7 +202,17 @@ func (c *QBittorrent) RemoveTorrent(hash string, deleteData bool) (bool, error) 
 }
 
 func (c *QBittorrent) GetCurrentFreeSpace(path string) (int64, error) {
-	return 0, errors.New("client does not support free disk space retrieval")
+	// get current main stats
+	data, err := c.client.SyncMainData()
+	if err != nil {
+		return 0, errors.Wrapf(err, "failed retrieving maindata")
+	}
+
+	// set internal free size
+	c.freeSpaceGB = float64(data.ServerState.FreeSpaceOnDisk) / humanize.GiByte
+	c.freeSpaceSet = true
+
+	return data.ServerState.FreeSpaceOnDisk, nil
 }
 
 func (c *QBittorrent) GetFreeSpace() float64 {
