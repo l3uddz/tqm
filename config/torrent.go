@@ -10,6 +10,7 @@ var (
 		"not registered with this tracker",
 		"torrent not found",
 		"unregistered torrent",
+		"torrent has been nuked",
 	}
 )
 
