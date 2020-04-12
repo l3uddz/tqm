@@ -4,13 +4,13 @@ import "strings"
 
 var (
 	unregisteredStatuses = []string{
-		"unregistered torrent",
+		"not registered with this tracker",
 		"torrent is not authorized for use on this tracker",
 		"torrent is not found",
-		"not registered with this tracker",
 		"torrent not found",
-		"unregistered torrent",
 		"torrent has been nuked",
+		"torrent does not exist",
+		"unregistered torrent",
 	}
 )
 
