@@ -84,7 +84,7 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 					continue
 				} else {
 					log.Info("Removed")
-					time.Sleep(2 * time.Second)
+					time.Sleep(1 * time.Second)
 				}
 			} else {
 				log.Warn("Dry-run enabled, skipping remove...")
@@ -121,7 +121,7 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 					continue
 				} else {
 					log.Warn("Removed")
-					time.Sleep(5 * time.Second)
+					time.Sleep(1 * time.Second)
 				}
 			} else {
 				log.Warn("Dry-run enabled, skipping remove...")
