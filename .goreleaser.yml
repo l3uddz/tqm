@@ -40,8 +40,8 @@ snapshot:
 
 # Changelog
 changelog:
-  sort: asc
   filters:
     exclude:
       - "^docs:"
       - "^test:"
+      - "^Merge branch"
