@@ -207,8 +207,16 @@ func (c *Deluge) RemoveTorrent(hash string, deleteData bool) (bool, error) {
 		return false, errors.Wrapf(err, "failed resuming torrent: %q", hash)
 	}
 
-	// sleep before removing torrent
+	// sleep before re-announcing torrent
 	time.Sleep(2 * time.Second)
+
+	// re-announce torrent
+	if err := c.client.ForceReannounce([]string{hash}); err != nil {
+		return false, errors.Wrapf(err, "failed re-announcing torrent: %q", hash)
+	}
+
+	// sleep before removing torrent
+	time.Sleep(3 * time.Second)
 
 	// remove
 	return c.client.RemoveTorrent(hash, deleteData)
