@@ -113,6 +113,13 @@ func (c *Deluge) Connect() error {
 		return errors.WithMessage(err, "failed retrieving label plugin client")
 	}
 
+	// retrieve daemon version
+	daemonVersion, err := lc.DaemonVersion()
+	if err != nil {
+		return errors.WithMessage(err, "failed retrieving daemon version")
+	}
+	c.log.Debugf("Daemon Version: %v", daemonVersion)
+
 	c.client = lc
 	return nil
 }
