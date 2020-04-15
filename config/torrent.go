@@ -37,7 +37,7 @@ type Torrent struct {
 	Peers           int64
 
 	// set by client on GetCurrentFreeSpace
-	FreeSpaceGB  float64
+	FreeSpaceGB  func() float64
 	FreeSpaceSet bool
 
 	// tracker

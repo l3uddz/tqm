@@ -9,8 +9,9 @@ type Interface interface {
 	Type() string
 	Connect() error
 	GetTorrents() (map[string]config.Torrent, error)
-	RemoveTorrent(hash string, deleteData bool) (bool, error)
-	GetCurrentFreeSpace(path string) (int64, error)
+	RemoveTorrent(string, bool) (bool, error)
+	GetCurrentFreeSpace(string) (int64, error)
+	AddFreeSpace(int64)
 	GetFreeSpace() float64
 
 	// filters

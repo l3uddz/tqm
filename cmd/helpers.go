@@ -63,9 +63,16 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 		if uniqueTorrent := tfm.IsUnique(t); uniqueTorrent {
 			// hard remove (the file paths in this torrent are unique to this torrent only)
 			log.Info("-----")
-			log.Infof("Hard removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
-			log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / Tracker Status: %q",
-				t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
+			if !t.FreeSpaceSet {
+				log.Infof("Hard removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
+			} else {
+				// show current free-space as well
+				log.Infof("Hard removing: %q - %s / %.2f GB", t.Name,
+					humanize.IBytes(uint64(t.DownloadedBytes)), t.FreeSpaceGB())
+			}
+
+			log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / "+
+				"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
 
 			if !flagDryRun {
 				// do remove
@@ -84,6 +91,14 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 					continue
 				} else {
 					log.Info("Removed")
+
+					// increase free space
+					if t.FreeSpaceSet {
+						log.Tracef("Increasing free space by: %s", humanize.IBytes(uint64(t.DownloadedBytes)))
+						c.AddFreeSpace(t.DownloadedBytes)
+						log.Tracef("New free space: %.2f GB", c.GetFreeSpace())
+					}
+
 					time.Sleep(1 * time.Second)
 				}
 			} else {
@@ -100,7 +115,13 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 		} else {
 			// soft remove (there are other torrents with identical file paths)
 			log.Info("-----")
-			log.Warnf("Soft removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
+			if !t.FreeSpaceSet {
+				log.Warnf("Soft removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
+			} else {
+				log.Warnf("Soft removing: %q - %s / %.2f GB", t.Name,
+					humanize.IBytes(uint64(t.DownloadedBytes)), t.FreeSpaceGB())
+			}
+
 			log.Warnf("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / Tracker Status: %q",
 				t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
 
