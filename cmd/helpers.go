@@ -115,7 +115,13 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 		} else {
 			// soft remove (there are other torrents with identical file paths)
 			log.Info("-----")
-			log.Warnf("Soft removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
+			if !t.FreeSpaceSet {
+				log.Warnf("Soft removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
+			} else {
+				log.Warnf("Soft removing: %q - %s / %.2f GB", t.Name,
+					humanize.IBytes(uint64(t.DownloadedBytes)), t.FreeSpaceGB())
+			}
+
 			log.Warnf("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / Tracker Status: %q",
 				t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
 
