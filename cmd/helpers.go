@@ -67,7 +67,7 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 				log.Infof("Hard removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
 			} else {
 				// show current free-space as well
-				log.Infof("Hard removing: %q - %s / %.2f GB", t.Name,
+				log.Infof("Hard removing: %q - %s - %.2f GB", t.Name,
 					humanize.IBytes(uint64(t.DownloadedBytes)), t.FreeSpaceGB())
 			}
 
@@ -118,7 +118,7 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 			if !t.FreeSpaceSet {
 				log.Warnf("Soft removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
 			} else {
-				log.Warnf("Soft removing: %q - %s / %.2f GB", t.Name,
+				log.Warnf("Soft removing: %q - %s - %.2f GB", t.Name,
 					humanize.IBytes(uint64(t.DownloadedBytes)), t.FreeSpaceGB())
 			}
 
