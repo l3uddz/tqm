@@ -169,7 +169,7 @@ func (c *QBittorrent) GetTorrents() (map[string]config.Torrent, error) {
 			Seeds:           td.SeedsTotal,
 			Peers:           td.PeersTotal,
 			// free space
-			FreeSpaceGB:  c.freeSpaceGB,
+			FreeSpaceGB:  c.GetFreeSpace,
 			FreeSpaceSet: c.freeSpaceSet,
 			// tracker
 			TrackerName:   trackerName,
@@ -203,7 +203,7 @@ func (c *QBittorrent) RemoveTorrent(hash string, deleteData bool) (bool, error) 
 	}
 
 	// sleep before removing torrent
-	time.Sleep(3 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	// remove
 	return c.client.Delete([]string{hash}, deleteData)
@@ -221,6 +221,10 @@ func (c *QBittorrent) GetCurrentFreeSpace(path string) (int64, error) {
 	c.freeSpaceSet = true
 
 	return data.ServerState.FreeSpaceOnDisk, nil
+}
+
+func (c *QBittorrent) AddFreeSpace(bytes int64) {
+	c.freeSpaceGB += float64(bytes) / humanize.GiByte
 }
 
 func (c *QBittorrent) GetFreeSpace() float64 {

@@ -181,7 +181,7 @@ func (c *Deluge) GetTorrents() (map[string]config.Torrent, error) {
 			Seeds:           t.TotalSeeds,
 			Peers:           t.TotalPeers,
 			// free space
-			FreeSpaceGB:  c.freeSpaceGB,
+			FreeSpaceGB:  c.GetFreeSpace,
 			FreeSpaceSet: c.freeSpaceSet,
 			// tracker
 			TrackerName:   t.TrackerHost,
@@ -216,7 +216,7 @@ func (c *Deluge) RemoveTorrent(hash string, deleteData bool) (bool, error) {
 	}
 
 	// sleep before removing torrent
-	time.Sleep(3 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	// remove
 	return c.client.RemoveTorrent(hash, deleteData)
@@ -234,6 +234,10 @@ func (c *Deluge) GetCurrentFreeSpace(path string) (int64, error) {
 	c.freeSpaceSet = true
 
 	return space, nil
+}
+
+func (c *Deluge) AddFreeSpace(bytes int64) {
+	c.freeSpaceGB += float64(bytes) / humanize.GiByte
 }
 
 func (c *Deluge) GetFreeSpace() float64 {
