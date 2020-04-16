@@ -43,7 +43,7 @@ filters:
       - Downloaded == false && !IsUnregistered()
       - SeedingHours < 26 && !IsUnregistered()
       # misc
-      - FreeSpaceSet && FreeSpaceGB > 2048 && !IsUnregistered()
+      - FreeSpaceSet && FreeSpaceGB() > 2048 && !IsUnregistered()
       # permaseed / un-sorted (unless torrent has been deleted)
       - Label in ["permaseed-mine", "permaseed-btn", "permaseed-hdb", "permaseed-ptp", "permaseed-bhd", "permaseed-nbl", "permaseed-ufc", "radarr", "sonarr", "lidarr"] && !IsUnregistered()
     remove:
