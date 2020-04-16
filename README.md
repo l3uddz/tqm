@@ -91,14 +91,14 @@ filters:
 
 ## Notes
 
-`FreeSpaceSet` and `FreeSpaceGB` are currently only supported for the following clients (when `free_space_path` is set):
+`FreeSpaceSet` and `FreeSpaceGB()` are currently only supported for the following clients (when `free_space_path` is set):
 
 - [x] Deluge
-- [ ] qBittorrent
+- [x] qBittorrent
 
-`FreeSpaceGB` will only be set **once** before torrents are evaluated against the chosen filter. 
+`FreeSpaceGB()` will only increase as torrents are hard-removed.
 
-This means as torrents are removed, `FreeSpaceGB` will not change.
+This only works with one disk referenced by `free_space_path` and will not account for torrents being on **different disks**.
 
 # Donate
 
