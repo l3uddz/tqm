@@ -93,12 +93,7 @@ var manageCmd = &cobra.Command{
 		tfm := torrentfilemap.New(torrents)
 		log.Infof("Mapped torrents to %d unique torrent files", tfm.Length())
 
-		// remove torrents that should be ignored
-		if err := removeIgnoredTorrents(log, c, torrents); err != nil {
-			log.WithError(err).Fatal("Failed removing torrents that should be ignored...")
-		}
-
-		// remove torrents that should be removed
+		// remove torrents that are not ignored and match remove criteria
 		if err := removeEligibleTorrents(log, c, torrents, tfm); err != nil {
 			log.WithError(err).Fatal("Failed removing eligible torrents...")
 		}
