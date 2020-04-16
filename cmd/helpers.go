@@ -49,101 +49,72 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 			continue
 		}
 
-		// torrent meets the remove filters, are the files unique and eligible for a hard deletion (remove data)
-		if uniqueTorrent := tfm.IsUnique(t); uniqueTorrent {
-			// hard remove (the file paths in this torrent are unique to this torrent only)
-			log.Info("-----")
-			if !t.FreeSpaceSet {
-				log.Infof("Hard removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
+		// torrent meets the remove filters
+		// are the files unique and eligible for a hard deletion (remove data)
+		uniqueTorrent := tfm.IsUnique(t)
+		removeMode := "Soft"
+
+		if uniqueTorrent {
+			// this torrent contains files found within other torrents (dont remove its data)
+			removeMode = "Hard"
+		}
+
+		// remove the torrent
+		log.Info("-----")
+		if !t.FreeSpaceSet {
+			log.Infof("%s removing: %q - %s", removeMode, t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
+		} else {
+			// show current free-space as well
+			log.Infof("%s removing: %q - %s - %.2f GB", removeMode, t.Name,
+				humanize.IBytes(uint64(t.DownloadedBytes)), t.FreeSpaceGB())
+		}
+
+		log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / "+
+			"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
+
+		if !flagDryRun {
+			// do remove
+			removed, err := c.RemoveTorrent(t.Hash, uniqueTorrent)
+			if err != nil {
+				log.WithError(err).Fatalf("Failed removing torrent: %+v", t)
+				// dont remove from torrents file map, but prevent further operations on this torrent
+				delete(torrents, h)
+				errorRemoveTorrents++
+				continue
+			} else if !removed {
+				log.Error("Failed removing torrent...")
+				// dont remove from torrents file map, but prevent further operations on this torrent
+				delete(torrents, h)
+				errorRemoveTorrents++
+				continue
 			} else {
-				// show current free-space as well
-				log.Infof("Hard removing: %q - %s - %.2f GB", t.Name,
-					humanize.IBytes(uint64(t.DownloadedBytes)), t.FreeSpaceGB())
-			}
+				log.Info("Removed")
 
-			log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / "+
-				"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
-
-			if !flagDryRun {
-				// do remove
-				removed, err := c.RemoveTorrent(t.Hash, true)
-				if err != nil {
-					log.WithError(err).Fatalf("Failed removing torrent: %+v", t)
-					// dont remove from torrents file map, but prevent further operations on this torrent
-					delete(torrents, h)
-					errorRemoveTorrents++
-					continue
-				} else if !removed {
-					log.Error("Failed removing torrent...")
-					// dont remove from torrents file map, but prevent further operations on this torrent
-					delete(torrents, h)
-					errorRemoveTorrents++
-					continue
-				} else {
-					log.Info("Removed")
-
-					// increase free space
-					if t.FreeSpaceSet {
-						log.Tracef("Increasing free space by: %s", humanize.IBytes(uint64(t.DownloadedBytes)))
-						c.AddFreeSpace(t.DownloadedBytes)
-						log.Tracef("New free space: %.2f GB", c.GetFreeSpace())
-					}
-
-					time.Sleep(1 * time.Second)
+				// increase free space (if its a hard remove)
+				if uniqueTorrent && t.FreeSpaceSet {
+					log.Tracef("Increasing free space by: %s", humanize.IBytes(uint64(t.DownloadedBytes)))
+					c.AddFreeSpace(t.DownloadedBytes)
+					log.Tracef("New free space: %.2f GB", c.GetFreeSpace())
 				}
-			} else {
-				log.Warn("Dry-run enabled, skipping remove...")
-			}
 
+				time.Sleep(1 * time.Second)
+			}
+		} else {
+			log.Warn("Dry-run enabled, skipping remove...")
+		}
+
+		if uniqueTorrent {
+			// increased hard removed counters
 			removedTorrentBytes += t.DownloadedBytes
 			hardRemoveTorrents++
-
-			// remove the torrent from the torrent file map
-			tfm.Remove(t)
-			delete(torrents, h)
-
 		} else {
-			// soft remove (there are other torrents with identical file paths)
-			log.Info("-----")
-			if !t.FreeSpaceSet {
-				log.Warnf("Soft removing: %q - %s", t.Name, humanize.IBytes(uint64(t.DownloadedBytes)))
-			} else {
-				log.Warnf("Soft removing: %q - %s - %.2f GB", t.Name,
-					humanize.IBytes(uint64(t.DownloadedBytes)), t.FreeSpaceGB())
-			}
-
-			log.Warnf("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / Tracker Status: %q",
-				t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
-
-			if !flagDryRun {
-				// do remove
-				removed, err := c.RemoveTorrent(t.Hash, false)
-				if err != nil {
-					log.WithError(err).Fatalf("Failed removing torrent: %+v", t)
-					// dont remove from torrents file map, but prevent further operations on this torrent
-					delete(torrents, h)
-					errorRemoveTorrents++
-					continue
-				} else if !removed {
-					log.Error("Failed removing torrent...")
-					// dont remove from torrents file map, but prevent further operations on this torrent
-					delete(torrents, h)
-					errorRemoveTorrents++
-					continue
-				} else {
-					log.Warn("Removed")
-					time.Sleep(1 * time.Second)
-				}
-			} else {
-				log.Warn("Dry-run enabled, skipping remove...")
-			}
-
+			// increase soft remove counters
 			softRemoveTorrents++
-
-			// remove the torrent from the torrent file map
-			tfm.Remove(t)
-			delete(torrents, h)
 		}
+
+		// remove the torrent from the torrent file map
+		tfm.Remove(t)
+		delete(torrents, h)
 	}
 
 	// show result
