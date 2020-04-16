@@ -9,13 +9,19 @@ import (
 	"time"
 )
 
-// remove torrents that meet ignore filters
-func removeIgnoredTorrents(log *logrus.Entry, c client.Interface, torrents map[string]config.Torrent) error {
+// remove torrents that meet remove filters
+func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[string]config.Torrent,
+	tfm *torrentfilemap.TorrentFileMap) error {
 	// vars
 	ignoredTorrents := 0
+	softRemoveTorrents := 0
+	hardRemoveTorrents := 0
+	errorRemoveTorrents := 0
+	var removedTorrentBytes int64 = 0
 
 	// iterate torrents
 	for h, t := range torrents {
+		// should we ignore this torrent?
 		ignore, err := c.ShouldIgnore(&t)
 		if err != nil {
 			// error while determining whether to ignore torrent
@@ -29,23 +35,7 @@ func removeIgnoredTorrents(log *logrus.Entry, c client.Interface, torrents map[s
 			ignoredTorrents++
 			continue
 		}
-	}
 
-	log.Infof("Ignored %d torrents, %d left", ignoredTorrents, len(torrents))
-	return nil
-}
-
-// remove torrents that meet remove filters
-func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[string]config.Torrent,
-	tfm *torrentfilemap.TorrentFileMap) error {
-	// vars
-	softRemoveTorrents := 0
-	hardRemoveTorrents := 0
-	errorRemoveTorrents := 0
-	var removedTorrentBytes int64 = 0
-
-	// iterate torrents
-	for h, t := range torrents {
 		// should we remove this torrent?
 		remove, err := c.ShouldRemove(&t)
 		if err != nil {
@@ -158,6 +148,7 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 
 	// show result
 	log.Info("-----")
+	log.Infof("Ignored torrents: %d", ignoredTorrents)
 	log.WithField("reclaimed_space", humanize.IBytes(uint64(removedTorrentBytes))).
 		Infof("Removed torrents: %d hard, %d soft and %d failures",
 			hardRemoveTorrents, softRemoveTorrents, errorRemoveTorrents)
