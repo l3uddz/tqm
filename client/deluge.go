@@ -196,14 +196,14 @@ func (c *Deluge) GetTorrents() (map[string]config.Torrent, error) {
 
 func (c *Deluge) RemoveTorrent(hash string, deleteData bool) (bool, error) {
 	// pause torrent
-	if err := c.client.PauseTorrent(hash); err != nil {
+	if err := c.client.PauseTorrents(hash); err != nil {
 		return false, errors.Wrapf(err, "failed pausing torrent: %q", hash)
 	}
 
 	time.Sleep(1 * time.Second)
 
 	// resume torrent
-	if err := c.client.ResumeTorrent(hash); err != nil {
+	if err := c.client.ResumeTorrents(hash); err != nil {
 		return false, errors.Wrapf(err, "failed resuming torrent: %q", hash)
 	}
 
