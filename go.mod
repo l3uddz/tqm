@@ -3,11 +3,11 @@ module github.com/l3uddz/tqm
 go 1.13
 
 require (
-	github.com/antonmedv/expr v1.8.2
+	github.com/antonmedv/expr v1.8.3
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/bobesa/go-domain-util v0.0.0-20190911083921-4033b5f7dd89
 	github.com/dustin/go-humanize v1.0.0
-	github.com/gdm85/go-libdeluge v0.5.1
+	github.com/gdm85/go-libdeluge v0.5.3
 	github.com/golang/protobuf v1.4.0 // indirect
 	github.com/knadh/koanf v0.9.1
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
@@ -27,10 +27,10 @@ require (
 	github.com/spf13/viper v1.6.3
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
-	golang.org/x/crypto v0.0.0-20200414173820-0848c9571904 // indirect
+	golang.org/x/crypto v0.0.0-20200420201142-3c4aac89819a // indirect
 	golang.org/x/net v0.0.0-20200324143707-d3edc9973b7e // indirect
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d // indirect
-	golang.org/x/sys v0.0.0-20200413165638-669c56c373c4 // indirect
+	golang.org/x/sys v0.0.0-20200420163511-1957bb5e6d1f // indirect
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/ini.v1 v1.55.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
