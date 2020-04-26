@@ -9,7 +9,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gdm85/go-libdeluge v0.5.3
 	github.com/golang/protobuf v1.4.0 // indirect
-	github.com/knadh/koanf v0.9.1
+	github.com/knadh/koanf v0.10.0
 	github.com/konsorten/go-windows-terminal-sequences v1.0.2 // indirect
 	github.com/l3uddz/go-qbittorrent v1.0.2
 	github.com/mattn/go-colorable v0.1.6 // indirect
