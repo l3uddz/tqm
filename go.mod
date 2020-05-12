@@ -34,5 +34,5 @@ require (
 	google.golang.org/appengine v1.6.5 // indirect
 	gopkg.in/ini.v1 v1.55.0 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect
-	gopkg.in/yaml.v2 v2.2.8
+	gopkg.in/yaml.v2 v2.3.0
 )
