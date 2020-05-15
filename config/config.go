@@ -1,7 +1,6 @@
 package config
 
 import (
-	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
@@ -12,7 +11,6 @@ import (
 	"github.com/l3uddz/tqm/logger"
 	"github.com/l3uddz/tqm/stringutils"
 	"github.com/pkg/errors"
-	"github.com/spf13/viper"
 	yaml2 "gopkg.in/yaml.v2"
 )
 
@@ -37,12 +35,6 @@ var (
 )
 
 /* Public */
-
-func (cfg Configuration) ToJsonString() (string, error) {
-	c := viper.AllSettings()
-	bs, err := json.MarshalIndent(c, "", "  ")
-	return string(bs), err
-}
 
 func Init(configFilePath string) error {
 	// set package variables
