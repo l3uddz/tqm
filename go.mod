@@ -3,7 +3,7 @@ module github.com/l3uddz/tqm
 go 1.13
 
 require (
-	github.com/antonmedv/expr v1.8.3
+	github.com/antonmedv/expr v1.8.6
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/bobesa/go-domain-util v0.0.0-20190911083921-4033b5f7dd89
 	github.com/dustin/go-humanize v1.0.0
