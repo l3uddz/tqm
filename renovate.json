@@ -9,6 +9,6 @@
     "gomodTidy"
   ],
   "ignoreDeps": [
-    "semver"
+    "github.com/blang/semver"
   ]
 }
