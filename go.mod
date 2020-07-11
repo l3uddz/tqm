@@ -7,7 +7,7 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/bobesa/go-domain-util v0.0.0-20190911083921-4033b5f7dd89
 	github.com/dustin/go-humanize v1.0.0
-	github.com/gdm85/go-libdeluge v0.5.3
+	github.com/gdm85/go-libdeluge v0.5.4
 	github.com/golang/protobuf v1.4.2 // indirect
 	github.com/knadh/koanf v0.10.0
 	github.com/l3uddz/go-qbittorrent v1.0.2
