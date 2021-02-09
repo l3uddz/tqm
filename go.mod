@@ -19,7 +19,7 @@ require (
 	github.com/onsi/gomega v1.9.0 // indirect
 	github.com/pkg/errors v0.9.1
 	github.com/rhysd/go-github-selfupdate v1.2.2
-	github.com/sirupsen/logrus v1.6.0
+	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.0.0
 	github.com/ulikunitz/xz v0.5.7 // indirect
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
