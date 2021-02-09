@@ -4,7 +4,7 @@ go 1.13
 
 require (
 	github.com/antonmedv/expr v1.8.8
-	github.com/blang/semver v3.5.1+incompatible
+	github.com/blang/semver v3.8.0+incompatible
 	github.com/bobesa/go-domain-util v0.0.0-20190911083921-4033b5f7dd89
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gdm85/go-libdeluge v0.5.4
