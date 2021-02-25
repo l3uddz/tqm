@@ -12,6 +12,7 @@ builds:
       - windows
     goarch:
       - amd64
+      - arm64
     ldflags:
       - -s -w
       - -X "github.com/l3uddz/tqm/runtime.Version={{ .Version }}"
@@ -24,10 +25,7 @@ builds:
 archives:
   -
     name_template: "{{ .ProjectName }}_v{{ .Version }}_{{ .Os }}_{{ .Arch }}"
-    format: "tar.gz"
-    format_overrides:
-      - goos: windows
-        format: zip
+    format: "binary"
 
 # Checksum
 checksum:
@@ -44,3 +42,4 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
+      - "^Merge branch"

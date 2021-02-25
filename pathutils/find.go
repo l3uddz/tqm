@@ -1,6 +1,7 @@
 package paths
 
 import (
+	"fmt"
 	"github.com/l3uddz/tqm/logger"
 	"os"
 	"path/filepath"
@@ -36,6 +37,10 @@ func GetPathsInFolder(folder string, includeFiles bool, includeFolders bool, acc
 	var size uint64 = 0
 
 	err := filepath.Walk(folder, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return fmt.Errorf("walk func: %w", err)
+		}
+
 		// skip files if not wanted
 		if !includeFiles && !info.IsDir() {
 			log.Tracef("Skipping file: %s", path)

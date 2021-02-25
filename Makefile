@@ -13,28 +13,14 @@ TIMESTAMP      = $(shell date +%s)
 VERSION        ?= 0.0.0-dev
 
 # Deps
-.PHONY: check_golangci
-check_golangci:
-	@command -v golangci-lint >/dev/null || (echo "golangci-lint is required."; exit 1)
 .PHONY: check_goreleaser
 check_goreleaser:
 	@command -v goreleaser >/dev/null || (echo "goreleaser is required."; exit 1)
-
-.PHONY: all ## Run tests, linting and build
-all: test lint build
-
-.PHONY: test-all ## Run tests and linting
-test-all: test lint
 
 .PHONY: test
 test: ## Run tests
 	@echo "*** go test ***"
 	go test -cover -v -race ${GO_PACKAGES}
-
-.PHONY: lint
-lint: check_golangci ## Run linting
-	@echo "*** golangci-lint ***"
-	golangci-lint run --timeout 10m
 
 .PHONY: vendor
 vendor: ## Vendor files and tidy go.mod
@@ -82,7 +68,7 @@ publish: check_goreleaser fetch ## Generate a release, and publish
 
 .PHONY: snapshot
 snapshot: check_goreleaser fetch ## Generate a snapshot release
-	goreleaser --snapshot --skip-validate --skip-publish --rm-dist
+	goreleaser --snapshot --skip-publish --rm-dist
 
 .PHONY: help
 help:
