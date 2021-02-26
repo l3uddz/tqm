@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"encoding/json"
 	"github.com/dustin/go-humanize"
 	"github.com/l3uddz/tqm/client"
 	"github.com/l3uddz/tqm/config"
@@ -81,6 +82,14 @@ var orphanCmd = &cobra.Command{
 			log.WithError(err).Fatal("Failed retrieving torrents")
 		} else {
 			log.Infof("Retrieved %d torrents", len(torrents))
+		}
+
+		if flagLogLevel > 1 {
+			if b, err := json.Marshal(torrents); err != nil {
+				log.WithError(err).Error("Failed marshalling torrents")
+			} else {
+				log.Trace(string(b))
+			}
 		}
 
 		// create map of files associated to torrents (via hash)
