@@ -1,6 +1,8 @@
 package config
 
-import "strings"
+import (
+	"strings"
+)
 
 var (
 	unregisteredStatuses = []string{
@@ -16,33 +18,33 @@ var (
 
 type Torrent struct {
 	// torrent
-	Hash            string
-	Name            string
-	Path            string
-	TotalBytes      int64
-	DownloadedBytes int64
-	State           string
-	Files           []string
-	Downloaded      bool
-	Seeding         bool
-	Ratio           float32
-	AddedSeconds    int64
-	AddedHours      float32
-	AddedDays       float32
-	SeedingSeconds  int64
-	SeedingHours    float32
-	SeedingDays     float32
-	Label           string
-	Seeds           int64
-	Peers           int64
+	Hash            string   `json:"Hash"`
+	Name            string   `json:"Name"`
+	Path            string   `json:"Path"`
+	TotalBytes      int64    `json:"TotalBytes"`
+	DownloadedBytes int64    `json:"DownloadedBytes"`
+	State           string   `json:"State"`
+	Files           []string `json:"Files"`
+	Downloaded      bool     `json:"Downloaded"`
+	Seeding         bool     `json:"Seeding"`
+	Ratio           float32  `json:"Ratio"`
+	AddedSeconds    int64    `json:"AddedSeconds"`
+	AddedHours      float32  `json:"AddedHours"`
+	AddedDays       float32  `json:"AddedDays"`
+	SeedingSeconds  int64    `json:"SeedingSeconds"`
+	SeedingHours    float32  `json:"SeedingHours"`
+	SeedingDays     float32  `json:"SeedingDays"`
+	Label           string   `json:"Label"`
+	Seeds           int64    `json:"Seeds"`
+	Peers           int64    `json:"Peers"`
 
 	// set by client on GetCurrentFreeSpace
-	FreeSpaceGB  func() float64
-	FreeSpaceSet bool
+	FreeSpaceGB  func() float64 `json:"-"`
+	FreeSpaceSet bool           `json:"-"`
 
 	// tracker
-	TrackerName   string
-	TrackerStatus string
+	TrackerName   string `json:"TrackerName"`
+	TrackerStatus string `json:"TrackerStatus"`
 }
 
 func (t *Torrent) IsUnregistered() bool {
