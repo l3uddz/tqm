@@ -169,7 +169,7 @@ func compileExpressions(clientName string, filter *config.FilterConfiguration) (
 	for _, ignoreExpr := range filter.Ignore {
 		program, err := expr.Compile(ignoreExpr, expr.Env(exprEnv), expr.AsBool())
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed compiling ignore expression for: %q", ignoreExpr)
+			return nil, nil, fmt.Errorf("compile ignore expression: %q: %w", ignoresExpr, err)
 		}
 
 		ignoresExpr = append(ignoresExpr, program)
@@ -179,7 +179,7 @@ func compileExpressions(clientName string, filter *config.FilterConfiguration) (
 	for _, removeExpr := range filter.Remove {
 		program, err := expr.Compile(removeExpr, expr.Env(exprEnv), expr.AsBool())
 		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed compiling remove expression for: %q", removeExpr)
+			return nil, nil, fmt.Errorf("compile remove expression: %q: %w", removeExpr, err)
 		}
 
 		removesExpr = append(removesExpr, program)

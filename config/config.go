@@ -138,7 +138,7 @@ func setConfigDefaults(check bool) error {
 		err = ioutil.WriteFile(cfgPath, m, 0644)
 		if err != nil {
 			log.WithError(err).Error("Failed saving configuration with new options...")
-			return errors.Wrap(err, "failed saving updated configuration")
+			return fmt.Errorf("save config: %w", err)
 		}
 
 		// notify

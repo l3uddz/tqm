@@ -1,9 +1,9 @@
 package logger
 
 import (
+	"fmt"
 	"runtime"
 
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
 )
@@ -46,7 +46,7 @@ func Init(logLevel int, logFilePath string) error {
 
 	if err != nil {
 		logrus.WithError(err).Errorf("Failed initializing rotating file log to %q", logFilePath)
-		return errors.Wrap(err, "failed initializing rotating file hook")
+		return fmt.Errorf("rotating file hook: %w", err)
 	}
 	logrus.AddHook(rotateFileHook)
 
