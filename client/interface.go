@@ -5,16 +5,15 @@ import (
 )
 
 type Interface interface {
-	// general
 	Type() string
 	Connect() error
 	GetTorrents() (map[string]config.Torrent, error)
 	RemoveTorrent(string, bool) (bool, error)
+	SetTorrentLabel(string, string) error
 	GetCurrentFreeSpace(string) (int64, error)
 	AddFreeSpace(int64)
 	GetFreeSpace() float64
 
-	// filters
 	ShouldIgnore(*config.Torrent) (bool, error)
 	ShouldRemove(*config.Torrent) (bool, error)
 }

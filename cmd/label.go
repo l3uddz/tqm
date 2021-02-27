@@ -1,23 +1,17 @@
 package cmd
 
 import (
-	"encoding/json"
 	"github.com/dustin/go-humanize"
 	"github.com/l3uddz/tqm/client"
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/logger"
-	"github.com/l3uddz/tqm/torrentfilemap"
 	"github.com/spf13/cobra"
 )
 
-var (
-	flagLabel bool
-)
-
-var manageCmd = &cobra.Command{
-	Use:   "manage [CLIENT]",
-	Short: "Check torrent client for torrents to remove/relabel",
-	Long:  `This command can be used to check a torrent clients queue for torrents to remove/relabel based on its configured filters.`,
+var labelCmd = &cobra.Command{
+	Use:   "label [CLIENT]",
+	Short: "Check torrent client for torrents to relabel",
+	Long:  `This command can be used to check a torrent clients queue for torrents to relabel based on its configured filters.`,
 
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -25,7 +19,7 @@ var manageCmd = &cobra.Command{
 		initCore(true)
 
 		// set log
-		log := logger.GetLogger("manage")
+		log := logger.GetLogger("label")
 
 		// retrieve client object
 		clientName := args[0]
@@ -86,43 +80,36 @@ var manageCmd = &cobra.Command{
 			}
 		}
 
+		log.Info("Running")
+		if err := c.SetTorrentLabel("a656e6ec1d59d7262c7644f21b7676978540ff2b", "permaseed-btn"); err != nil {
+			log.WithError(err).Fatal("Failed setting torrent label")
+		}
+
 		// retrieve torrents
-		torrents, err := c.GetTorrents()
-		if err != nil {
-			log.WithError(err).Fatal("Failed retrieving torrents")
-		} else {
-			log.Infof("Retrieved %d torrents", len(torrents))
-		}
+		//torrents, err := c.GetTorrents()
+		//if err != nil {
+		//	log.WithError(err).Fatal("Failed retrieving torrents")
+		//} else {
+		//	log.Infof("Retrieved %d torrents", len(torrents))
+		//}
+		//
+		//if flagLogLevel > 1 {
+		//	if b, err := json.Marshal(torrents); err != nil {
+		//		log.WithError(err).Error("Failed marshalling torrents")
+		//	} else {
+		//		log.Trace(string(b))
+		//	}
+		//}
+		//
+		//// create map of files associated to torrents (via hash)
+		//tfm := torrentfilemap.New(torrents)
+		//log.Infof("Mapped torrents to %d unique torrent files", tfm.Length())
 
-		if flagLogLevel > 1 {
-			if b, err := json.Marshal(torrents); err != nil {
-				log.WithError(err).Error("Failed marshalling torrents")
-			} else {
-				log.Trace(string(b))
-			}
-		}
+		// relabel torrents that meet the filter criteria
 
-		// create map of files associated to torrents (via hash)
-		tfm := torrentfilemap.New(torrents)
-		log.Infof("Mapped torrents to %d unique torrent files", tfm.Length())
-
-		// remove torrents that are not ignored and match remove criteria
-		if err := removeEligibleTorrents(log, c, torrents, tfm); err != nil {
-			log.WithError(err).Fatal("Failed removing eligible torrents...")
-		}
-
-		// relabel torrents
-		if flagLabel {
-			log.Info("-----")
-			if err := labelCmd.Execute(); err != nil {
-				log.WithError(err).Fatal("Failed executing label command")
-			}
-		}
 	},
 }
 
 func init() {
-	manageCmd.Flags().BoolVar(&flagLabel, "label", false, "Relabel torrents")
-
-	rootCmd.AddCommand(manageCmd)
+	rootCmd.AddCommand(labelCmd)
 }
