@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"encoding/json"
 	"github.com/dustin/go-humanize"
 	"github.com/l3uddz/tqm/client"
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/expression"
 	"github.com/l3uddz/tqm/logger"
+	"github.com/l3uddz/tqm/torrentfilemap"
 	"github.com/spf13/cobra"
 )
 
@@ -81,33 +83,30 @@ var labelCmd = &cobra.Command{
 			}
 		}
 
-		log.Info("Running")
-		if err := c.SetTorrentLabel("a656e6ec1d59d7262c7644f21b7676978540ff2b", "permaseed-btn"); err != nil {
-			log.WithError(err).Fatal("Failed setting torrent label")
+		// retrieve torrents
+		torrents, err := c.GetTorrents()
+		if err != nil {
+			log.WithError(err).Fatal("Failed retrieving torrents")
+		} else {
+			log.Infof("Retrieved %d torrents", len(torrents))
 		}
 
-		// retrieve torrents
-		//torrents, err := c.GetTorrents()
-		//if err != nil {
-		//	log.WithError(err).Fatal("Failed retrieving torrents")
-		//} else {
-		//	log.Infof("Retrieved %d torrents", len(torrents))
-		//}
-		//
-		//if flagLogLevel > 1 {
-		//	if b, err := json.Marshal(torrents); err != nil {
-		//		log.WithError(err).Error("Failed marshalling torrents")
-		//	} else {
-		//		log.Trace(string(b))
-		//	}
-		//}
-		//
-		//// create map of files associated to torrents (via hash)
-		//tfm := torrentfilemap.New(torrents)
-		//log.Infof("Mapped torrents to %d unique torrent files", tfm.Length())
+		if flagLogLevel > 1 {
+			if b, err := json.Marshal(torrents); err != nil {
+				log.WithError(err).Error("Failed marshalling torrents")
+			} else {
+				log.Trace(string(b))
+			}
+		}
+
+		// create map of files associated to torrents (via hash)
+		tfm := torrentfilemap.New(torrents)
+		log.Infof("Mapped torrents to %d unique torrent files", tfm.Length())
 
 		// relabel torrents that meet the filter criteria
-
+		if err := relabelEligibleTorrents(log, c, torrents, tfm); err != nil {
+			log.WithError(err).Fatal("Failed relabeling eligible torrents...")
+		}
 	},
 }
 

@@ -2,7 +2,6 @@ package client
 
 import (
 	"fmt"
-	"github.com/antonmedv/expr"
 	"github.com/dustin/go-humanize"
 	"github.com/i0range/go-qbittorrent"
 	"github.com/l3uddz/tqm/config"
@@ -244,41 +243,44 @@ func (c *QBittorrent) GetFreeSpace() float64 {
 /* Filters */
 
 func (c *QBittorrent) ShouldIgnore(t *config.Torrent) (bool, error) {
-	for _, expression := range c.exp.Ignores {
-		result, err := expr.Run(expression, t)
-		if err != nil {
-			return true, fmt.Errorf("check ignore expression: %w", err)
-		}
-
-		expResult, ok := result.(bool)
-		if !ok {
-			return true, fmt.Errorf("type assert ignore expression result: %w", err)
-		}
-
-		if expResult {
-			return true, nil
-		}
+	match, err := expression.CheckTorrent(t, c.exp.Ignores)
+	if err != nil {
+		return true, fmt.Errorf("check ignore expression: %v: %w", t.Hash, err)
 	}
 
-	return false, nil
+	return match, nil
 }
 
 func (c *QBittorrent) ShouldRemove(t *config.Torrent) (bool, error) {
-	for _, expression := range c.exp.Removes {
-		result, err := expr.Run(expression, t)
-		if err != nil {
-			return false, fmt.Errorf("check remeove expression: %w", err)
-		}
-
-		expResult, ok := result.(bool)
-		if !ok {
-			return false, fmt.Errorf("type assert remove expression result: %w", err)
-		}
-
-		if expResult {
-			return true, nil
-		}
+	match, err := expression.CheckTorrent(t, c.exp.Removes)
+	if err != nil {
+		return false, fmt.Errorf("check remove expression: %v: %w", t.Hash, err)
 	}
 
-	return false, nil
+	return match, nil
+}
+
+func (c *QBittorrent) ShouldRelabel(t *config.Torrent) (string, bool, error) {
+	for label, exp := range c.exp.Labels {
+		// check ignores
+		match, err := expression.CheckTorrent(t, exp.Ignores)
+		if err != nil {
+			return "", false, fmt.Errorf("check ignore expression: %v: %w", t.Hash, err)
+		} else if match {
+			continue
+		}
+
+		// check update
+		match, err = expression.CheckTorrent(t, exp.Updates)
+		if err != nil {
+			return "", false, fmt.Errorf("check update expression: %v: %w", t.Hash, err)
+		} else if !match {
+			continue
+		}
+
+		// we should re-label
+		return label, true, nil
+	}
+
+	return "", false, nil
 }

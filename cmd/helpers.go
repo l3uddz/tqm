@@ -9,6 +9,61 @@ import (
 	"time"
 )
 
+// relabel torrent that meet required filters
+func relabelEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[string]config.Torrent,
+	tfm *torrentfilemap.TorrentFileMap) error {
+	// vars
+	ignoredTorrents := 0
+	nonUniqueTorrents := 0
+	relabeledTorrents := 0
+
+	// iterate torrents
+	for h, t := range torrents {
+		if !tfm.IsUnique(t) {
+			// torrent file is not unique, files are contained within another torrent
+			// so we cannot safely change the label in-case of auto move
+			nonUniqueTorrents++
+			log.Warnf("Skipping non unique torrent: %v: %+v", h, t)
+			continue
+		}
+
+		// should we relabel torrent?
+		label, relabel, err := c.ShouldRelabel(&t)
+		if err != nil {
+			// error while determining whether to relabel torrent
+			log.WithError(err).Errorf("Failed determining whether to relabel %q: %+v", t.Name, t)
+			continue
+		} else if !relabel {
+			// torrent did not meet the relabel filters
+			log.Tracef("Not relabeling %s: %s", h, t.Name)
+			ignoredTorrents++
+			continue
+		}
+
+		// relabel
+		log.Info("-----")
+		log.Infof("Relabeling: %q - %s", t.Name, label)
+		log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / "+
+			"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
+
+		if !flagDryRun {
+		} else {
+			log.Warn("Dry-run enabled, skipping relabel...")
+		}
+
+		relabeledTorrents++
+	}
+
+	// show result
+	log.Info("-----")
+	log.Infof("Ignored torrents: %d", ignoredTorrents)
+	if nonUniqueTorrents > 0 {
+		log.Infof("Non-unique torrents: %d", nonUniqueTorrents)
+	}
+	log.Infof("Relabeled torrents: %d", relabeledTorrents)
+	return nil
+}
+
 // remove torrents that meet remove filters
 func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[string]config.Torrent,
 	tfm *torrentfilemap.TorrentFileMap) error {
