@@ -25,7 +25,8 @@ var (
 	flagDryRun bool
 
 	// Global vars
-	log *logrus.Entry
+	log         *logrus.Entry
+	initialized bool
 )
 
 var rootCmd = &cobra.Command{

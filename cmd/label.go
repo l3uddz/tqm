@@ -19,7 +19,10 @@ var labelCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		// init core
-		initCore(true)
+		if !initialized {
+			initCore(true)
+			initialized = true
+		}
 
 		// set log
 		log := logger.GetLogger("label")

@@ -11,10 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	flagLabel bool
-)
-
 var manageCmd = &cobra.Command{
 	Use:   "manage [CLIENT]",
 	Short: "Check torrent client for torrents to remove/relabel",
@@ -23,7 +19,10 @@ var manageCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		// init core
-		initCore(true)
+		if !initialized {
+			initCore(true)
+			initialized = true
+		}
 
 		// set log
 		log := logger.GetLogger("manage")
@@ -111,19 +110,9 @@ var manageCmd = &cobra.Command{
 		if err := removeEligibleTorrents(log, c, torrents, tfm); err != nil {
 			log.WithError(err).Fatal("Failed removing eligible torrents...")
 		}
-
-		// relabel torrents
-		if flagLabel {
-			log.Info("-----")
-			if err := labelCmd.Execute(); err != nil {
-				log.WithError(err).Fatal("Failed executing label command")
-			}
-		}
 	},
 }
 
 func init() {
-	manageCmd.Flags().BoolVar(&flagLabel, "label", false, "Relabel torrents")
-
 	rootCmd.AddCommand(manageCmd)
 }

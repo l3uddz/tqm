@@ -16,6 +16,7 @@ func relabelEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map
 	ignoredTorrents := 0
 	nonUniqueTorrents := 0
 	relabeledTorrents := 0
+	errorRelabelTorrents := 0
 
 	// iterate torrents
 	for h, t := range torrents {
@@ -47,6 +48,14 @@ func relabelEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map
 			"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
 
 		if !flagDryRun {
+			if err := c.SetTorrentLabel(t.Hash, label); err != nil {
+				log.WithError(err).Fatalf("Failed relabeling torrent: %+v", t)
+				errorRelabelTorrents++
+				continue
+			}
+
+			log.Info("Relabeled")
+			time.Sleep(1 * time.Second)
 		} else {
 			log.Warn("Dry-run enabled, skipping relabel...")
 		}
@@ -60,7 +69,7 @@ func relabelEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map
 	if nonUniqueTorrents > 0 {
 		log.Infof("Non-unique torrents: %d", nonUniqueTorrents)
 	}
-	log.Infof("Relabeled torrents: %d", relabeledTorrents)
+	log.Infof("Relabeled torrents: %d, %d failures", relabeledTorrents, errorRelabelTorrents)
 	return nil
 }
 
