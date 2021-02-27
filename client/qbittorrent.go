@@ -136,8 +136,7 @@ func (c *QBittorrent) GetTorrents() (map[string]config.Torrent, error) {
 		}
 
 		// added time
-		addedTime := td.AdditionDate
-		addedTimeSecs := int64(time.Since(addedTime).Seconds())
+		addedTimeSecs := int64(time.Since(td.AdditionDate).Seconds())
 
 		// torrent files
 		var files []string
@@ -160,9 +159,9 @@ func (c *QBittorrent) GetTorrents() (map[string]config.Torrent, error) {
 			AddedSeconds:    addedTimeSecs,
 			AddedHours:      float32(addedTimeSecs) / 60 / 60,
 			AddedDays:       float32(addedTimeSecs) / 60 / 60 / 24,
-			SeedingSeconds:  int64(td.SeedingTime),
-			SeedingHours:    float32(td.SeedingTime) / 60 / 60,
-			SeedingDays:     float32(td.SeedingTime) / 60 / 60 / 24,
+			SeedingSeconds:  int64(td.SeedingTime.Seconds()),
+			SeedingHours:    float32(td.SeedingTime.Seconds()) / 60 / 60,
+			SeedingDays:     float32(td.SeedingTime.Seconds()) / 60 / 60 / 24,
 			Label:           t.Category,
 			Seeds:           int64(td.SeedsTotal),
 			Peers:           int64(td.PeersTotal),
