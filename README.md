@@ -39,23 +39,28 @@ filters:
   default:
     ignore:
       # general
+      - TrackerStatus contains "Tracker is down"
       - Downloaded == false && !IsUnregistered()
       - SeedingHours < 26 && !IsUnregistered()
-      # misc
-      - FreeSpaceSet && FreeSpaceGB() > 2048 && !IsUnregistered()
       # permaseed / un-sorted (unless torrent has been deleted)
-      - Label in ["permaseed-mine", "permaseed-btn", "permaseed-hdb", "permaseed-ptp", "permaseed-bhd", "permaseed-nbl", "permaseed-ufc", "radarr", "sonarr", "lidarr"] && !IsUnregistered()
+      - Label startsWith "permaseed-" && !IsUnregistered()
     remove:
       # general
       - IsUnregistered()
       # imported
-      - Label in ["sonarr-imported"] && (Ratio > 4.0 || SeedingDays >= 15.0)
+      - Label in ["sonarr-imported", "radarr-imported", "lidarr-imported"] && (Ratio > 4.0 || SeedingDays >= 15.0)
       # ipt
-      - Label in ["autoremove-ipt"] && (Ratio > 4.0 || SeedingDays >= 15.0)
-      # mtv
-      - Label in ["autoremove-mtv"] && (Ratio > 4.0 || SeedingDays >= 15.0)
+      - Label in ["autoremove-ipt"] && (Ratio > 3.0 || SeedingDays >= 15.0)
       # hdt
-      - Label in ["autoremove-hdt"] && (Ratio > 4.0 || SeedingDays >= 15.0)
+      - Label in ["autoremove-hdt"] && (Ratio > 3.0 || SeedingDays >= 15.0)
+      # bhd
+      - Label in ["autoremove-bhd"] && (Ratio > 3.0 || SeedingDays >= 15.0)
+      # ptp
+      - Label in ["autoremove-ptp"] && (Ratio > 3.0 || SeedingDays >= 15.0)
+      # btn
+      - Label in ["autoremove-btn"] && (Ratio > 3.0 || SeedingDays >= 15.0)
+      # hdb
+      - Label in ["autoremove-hdb"] && (Ratio > 3.0 || SeedingDays >= 15.0)
     label:
       # permaseed-btn will become the torrents new label
       permaseed-btn:
