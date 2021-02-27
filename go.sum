@@ -194,8 +194,6 @@ github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb/go.mod h1:+NfK9FKe
 github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
 github.com/hpcloud/tail v1.0.0 h1:nfCOvKYfkgYP8hkirhJocXT2+zOD8yUNjXaWfTlyFKI=
 github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
-github.com/i0range/go-qbittorrent v0.0.0-20200829122403-167ccd7e67e8 h1:k7ztYHu6u39sD9hNHi2njUO6Z20ZT1gJOcSXcToqWMw=
-github.com/i0range/go-qbittorrent v0.0.0-20200829122403-167ccd7e67e8/go.mod h1:FMs4+0oHD4sg/alEYQzo0BhTl5sv3QHGaBMvGJtX1s0=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf h1:WfD7VjIE6z8dIvMsI4/s+1qr5EL+zoIGev1BQj1eoJ8=
 github.com/inconshreveable/go-update v0.0.0-20160112193335-8152e7eb6ccf/go.mod h1:hyb9oH7vZsitZCiBt0ZvifOrB+qc8PS5IiilCIb87rg=
@@ -220,6 +218,10 @@ github.com/kr/pretty v0.1.0/go.mod h1:dAy3ld7l9f0ibDNOQOHHMYYIIbhfbHSm3C4ZsoJORN
 github.com/kr/pty v1.1.1/go.mod h1:pFQYn66WHrOpPYNljwOMqo10TkYh1fy3cYio2l3bCsQ=
 github.com/kr/text v0.1.0 h1:45sCR5RtlFHMR4UwH9sdQ5TC8v0qDQCHnXt+kaKSTVE=
 github.com/kr/text v0.1.0/go.mod h1:4Jbv+DJW3UT/LiOwJeYQe1efqtUx/iVham/4vfdArNI=
+github.com/l3uddz/go-qbt v0.0.0-20210227192959-cff436852a17 h1:vbaL97gVqBn+P8u0qUk5D+0kntfhbdv+PknXfnCgq+U=
+github.com/l3uddz/go-qbt v0.0.0-20210227192959-cff436852a17/go.mod h1:mykjBxqNo3lUI09JHTbMW1FZHZw/BWyfaqrbAj63hwg=
+github.com/l3uddz/go-qbt v0.0.0-20210227193422-031ebabafe7c h1:WZr58k+3MK6HQYgG2CoSLbWcH4MqbcqaZgkeMZv3pIU=
+github.com/l3uddz/go-qbt v0.0.0-20210227193422-031ebabafe7c/go.mod h1:mykjBxqNo3lUI09JHTbMW1FZHZw/BWyfaqrbAj63hwg=
 github.com/lucasb-eyer/go-colorful v1.0.2/go.mod h1:0MS4r+7BZKSJ5mw4/S5MPN+qHFF1fYclkSPilDOKW0s=
 github.com/lucasb-eyer/go-colorful v1.0.3/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
 github.com/magefile/mage v1.10.0/go.mod h1:z5UZb/iS3GoOSn0JgWuiw7dxlurVYTu+/jHXqQg881A=

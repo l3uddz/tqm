@@ -3,7 +3,7 @@ package client
 import (
 	"fmt"
 	"github.com/dustin/go-humanize"
-	"github.com/i0range/go-qbittorrent"
+	"github.com/l3uddz/go-qbt"
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/expression"
 	"github.com/l3uddz/tqm/logger"

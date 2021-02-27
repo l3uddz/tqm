@@ -9,8 +9,8 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gdm85/go-libdeluge v0.5.4
 	github.com/golang/protobuf v1.4.3 // indirect
-	github.com/i0range/go-qbittorrent v0.0.0-20200829122403-167ccd7e67e8
 	github.com/knadh/koanf v0.15.0
+	github.com/l3uddz/go-qbt v0.0.0-20210227193422-031ebabafe7c
 	github.com/magefile/mage v1.11.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
