@@ -55,7 +55,7 @@ func relabelEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map
 			}
 
 			log.Info("Relabeled")
-			time.Sleep(1 * time.Second)
+			time.Sleep(5 * time.Second)
 		} else {
 			log.Warn("Dry-run enabled, skipping relabel...")
 		}
