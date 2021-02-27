@@ -11,10 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var manageCmd = &cobra.Command{
-	Use:   "manage [CLIENT]",
-	Short: "Check torrent client for torrents to remove/relabel",
-	Long:  `This command can be used to check a torrent clients queue for torrents to remove/relabel based on its configured filters.`,
+var cleanCmd = &cobra.Command{
+	Use:   "clean [CLIENT]",
+	Short: "Check torrent client for torrents to remove",
+	Long:  `This command can be used to check a torrent clients queue for torrents to remove based on its configured filters.`,
 
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
@@ -25,7 +25,7 @@ var manageCmd = &cobra.Command{
 		}
 
 		// set log
-		log := logger.GetLogger("manage")
+		log := logger.GetLogger("clean")
 
 		// retrieve client object
 		clientName := args[0]
@@ -114,5 +114,5 @@ var manageCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(manageCmd)
+	rootCmd.AddCommand(cleanCmd)
 }

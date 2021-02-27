@@ -11,8 +11,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var labelCmd = &cobra.Command{
-	Use:   "label [CLIENT]",
+var relabelCmd = &cobra.Command{
+	Use:   "relabel [CLIENT]",
 	Short: "Check torrent client for torrents to relabel",
 	Long:  `This command can be used to check a torrent clients queue for torrents to relabel based on its configured filters.`,
 
@@ -25,7 +25,7 @@ var labelCmd = &cobra.Command{
 		}
 
 		// set log
-		log := logger.GetLogger("label")
+		log := logger.GetLogger("relabel")
 
 		// retrieve client object
 		clientName := args[0]
@@ -114,5 +114,5 @@ var labelCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(labelCmd)
+	rootCmd.AddCommand(relabelCmd)
 }

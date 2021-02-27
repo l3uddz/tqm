@@ -56,6 +56,23 @@ filters:
       - Label in ["autoremove-mtv"] && (Ratio > 4.0 || SeedingDays >= 15.0)
       # hdt
       - Label in ["autoremove-hdt"] && (Ratio > 4.0 || SeedingDays >= 15.0)
+    label:
+      # permaseed-btn will become the torrents new label
+      permaseed-btn:
+        ignore:
+          - Label != "sonarr-imported"
+          - TrackerName != "landof.tv"
+          - not (Name contains "1080p")
+          - IsUnregistered()
+        update:
+          - len(Files) > 1
+      # autoremove-btn will become the torrents new label
+      autoremove-btn:
+        ignore:
+          - Label != "permaseed-btn"
+          - Seeds < 6
+        update:
+          - not (Name contains "1080p")
 ```
 
 ## Supported Clients
@@ -66,21 +83,19 @@ filters:
 
 ## Example Commands
 
-1. Manage - Retrieve torrent client queue and run against configured filters
+1. Clean - Retrieve torrent client queue and remove torrents matching its configured filters
 
-`tqm manage deluge --dry-run`
+`tqm clean qbt --dry-run`
 
-`tqm manage deluge`
+`tqm clean qbt`
 
-`tqm manage qbt --dry-run`
+2. Relabel - Retrieve torrent client queue and relabel torrents matching its configured filters
 
-`tqm manage qbt`
+`tqm relabel qbt --dry-run`
 
-2. Orphan - Retrieve torrent client queue and local files/folders in download_path, remove orphan files/folders
+`tqm relabel qbt`
 
-`tqm orphan deluge --dry-run`
-
-`tqm orphan deluge`
+3. Orphan - Retrieve torrent client queue and local files/folders in download_path, remove orphan files/folders
 
 `tqm orphan qbt --dry-run`
 
