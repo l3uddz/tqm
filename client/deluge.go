@@ -3,11 +3,11 @@ package client
 import (
 	"fmt"
 	"github.com/dustin/go-humanize"
+	"github.com/l3uddz/tqm/expression"
 	"path"
 	"time"
 
 	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
 	delugeclient "github.com/gdm85/go-libdeluge"
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/logger"
@@ -35,18 +35,16 @@ type Deluge struct {
 	freeSpaceSet bool
 
 	// internal compiled filters
-	ignoresExpr []*vm.Program
-	removesExpr []*vm.Program
+	exp *expression.Expressions
 }
 
 /* Initializer */
 
-func NewDeluge(name string, ignoresExpr []*vm.Program, removesExpr []*vm.Program) (Interface, error) {
+func NewDeluge(name string, exp *expression.Expressions) (Interface, error) {
 	tc := Deluge{
-		log:         logger.GetLogger(name),
-		clientType:  "Deluge",
-		ignoresExpr: ignoresExpr,
-		removesExpr: removesExpr,
+		log:        logger.GetLogger(name),
+		clientType: "Deluge",
+		exp:        exp,
 	}
 
 	// load config
@@ -261,7 +259,7 @@ func (c *Deluge) GetFreeSpace() float64 {
 /* Filters */
 
 func (c *Deluge) ShouldIgnore(t *config.Torrent) (bool, error) {
-	for _, expression := range c.ignoresExpr {
+	for _, expression := range c.exp.Ignores {
 		result, err := expr.Run(expression, t)
 		if err != nil {
 			return true, fmt.Errorf("check ignore expression: %w", err)
@@ -281,7 +279,7 @@ func (c *Deluge) ShouldIgnore(t *config.Torrent) (bool, error) {
 }
 
 func (c *Deluge) ShouldRemove(t *config.Torrent) (bool, error) {
-	for _, expression := range c.removesExpr {
+	for _, expression := range c.exp.Removes {
 		result, err := expr.Run(expression, t)
 		if err != nil {
 			return false, fmt.Errorf("check remeove expression: %w", err)

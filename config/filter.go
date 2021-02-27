@@ -5,6 +5,6 @@ type FilterConfiguration struct {
 	Remove []string
 	Label  map[string]struct {
 		Ignore []string
-		Move   []string
+		Update []string
 	}
 }

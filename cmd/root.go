@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
 	"github.com/l3uddz/tqm/runtime"
 	"github.com/l3uddz/tqm/stringutils"
 	"os"
@@ -158,32 +156,4 @@ func getClientFilter(clientConfig map[string]interface{}) (*config.FilterConfigu
 	}
 
 	return &clientFilter, nil
-}
-
-func compileExpressions(clientName string, filter *config.FilterConfiguration) ([]*vm.Program, []*vm.Program, error) {
-	exprEnv := &config.Torrent{}
-	var ignoresExpr []*vm.Program
-	var removesExpr []*vm.Program
-
-	// compile ignores
-	for _, ignoreExpr := range filter.Ignore {
-		program, err := expr.Compile(ignoreExpr, expr.Env(exprEnv), expr.AsBool())
-		if err != nil {
-			return nil, nil, fmt.Errorf("compile ignore expression: %q: %w", ignoresExpr, err)
-		}
-
-		ignoresExpr = append(ignoresExpr, program)
-	}
-
-	// compile removes
-	for _, removeExpr := range filter.Remove {
-		program, err := expr.Compile(removeExpr, expr.Env(exprEnv), expr.AsBool())
-		if err != nil {
-			return nil, nil, fmt.Errorf("compile remove expression: %q: %w", removeExpr, err)
-		}
-
-		removesExpr = append(removesExpr, program)
-	}
-
-	return ignoresExpr, removesExpr, nil
 }

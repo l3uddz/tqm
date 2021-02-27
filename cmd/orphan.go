@@ -62,7 +62,7 @@ var orphanCmd = &cobra.Command{
 		}
 
 		// load client object
-		c, err := client.NewClient(*clientType, clientName, nil, nil)
+		c, err := client.NewClient(*clientType, clientName, nil)
 		if err != nil {
 			log.WithError(err).Fatalf("Failed initializing client: %q", clientName)
 		}

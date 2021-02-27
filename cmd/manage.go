@@ -5,6 +5,7 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/l3uddz/tqm/client"
 	"github.com/l3uddz/tqm/config"
+	"github.com/l3uddz/tqm/expression"
 	"github.com/l3uddz/tqm/logger"
 	"github.com/l3uddz/tqm/torrentfilemap"
 	"github.com/spf13/cobra"
@@ -55,13 +56,13 @@ var manageCmd = &cobra.Command{
 		}
 
 		// compile client filters
-		ignoreExpressions, removeExpressions, err := compileExpressions(clientName, clientFilter)
+		exp, err := expression.Compile(clientName, clientFilter)
 		if err != nil {
 			log.WithError(err).Fatal("Failed compiling client filters")
 		}
 
 		// load client object
-		c, err := client.NewClient(*clientType, clientName, ignoreExpressions, removeExpressions)
+		c, err := client.NewClient(*clientType, clientName, exp)
 		if err != nil {
 			log.WithError(err).Fatalf("Failed initializing client: %q", clientName)
 		}

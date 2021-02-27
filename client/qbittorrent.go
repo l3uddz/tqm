@@ -2,15 +2,16 @@ package client
 
 import (
 	"fmt"
-	"github.com/KnutZuidema/go-qbittorrent"
 	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
 	"github.com/dustin/go-humanize"
+	"github.com/i0range/go-qbittorrent"
 	"github.com/l3uddz/tqm/config"
+	"github.com/l3uddz/tqm/expression"
 	"github.com/l3uddz/tqm/logger"
 	"github.com/l3uddz/tqm/sliceutils"
 	"github.com/l3uddz/tqm/stringutils"
 	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 	"time"
@@ -33,18 +34,16 @@ type QBittorrent struct {
 	freeSpaceSet bool
 
 	// internal compiled filters
-	ignoresExpr []*vm.Program
-	removesExpr []*vm.Program
+	exp *expression.Expressions
 }
 
 /* Initializer */
 
-func NewQBittorrent(name string, ignoresExpr []*vm.Program, removesExpr []*vm.Program) (Interface, error) {
+func NewQBittorrent(name string, exp *expression.Expressions) (Interface, error) {
 	tc := QBittorrent{
-		log:         logger.GetLogger(name),
-		clientType:  "qBittorrent",
-		ignoresExpr: ignoresExpr,
-		removesExpr: removesExpr,
+		log:        logger.GetLogger(name),
+		clientType: "qBittorrent",
+		exp:        exp,
 	}
 
 	// load config
@@ -58,7 +57,9 @@ func NewQBittorrent(name string, ignoresExpr []*vm.Program, removesExpr []*vm.Pr
 	}
 
 	// init client
-	tc.client = qbittorrent.NewClient(*tc.Url, nil)
+	qbl := logrus.New()
+	qbl.Out = ioutil.Discard
+	tc.client = qbittorrent.NewClient(strings.TrimSuffix(*tc.Url, "/"), qbl)
 
 	return &tc, nil
 }
@@ -79,7 +80,7 @@ func (c *QBittorrent) Connect() error {
 	apiVersion, err := c.client.Application.GetAPIVersion()
 	if err != nil {
 		return fmt.Errorf("get api version: %w", err)
-	} else if stringutils.Atof64(apiVersion, 0.0) < 2.2 {
+	} else if stringutils.Atof64(apiVersion[0:3], 0.0) < 2.2 {
 		return fmt.Errorf("unsupported webapi version: %v", apiVersion)
 	}
 
@@ -244,7 +245,7 @@ func (c *QBittorrent) GetFreeSpace() float64 {
 /* Filters */
 
 func (c *QBittorrent) ShouldIgnore(t *config.Torrent) (bool, error) {
-	for _, expression := range c.ignoresExpr {
+	for _, expression := range c.exp.Ignores {
 		result, err := expr.Run(expression, t)
 		if err != nil {
 			return true, fmt.Errorf("check ignore expression: %w", err)
@@ -264,7 +265,7 @@ func (c *QBittorrent) ShouldIgnore(t *config.Torrent) (bool, error) {
 }
 
 func (c *QBittorrent) ShouldRemove(t *config.Torrent) (bool, error) {
-	for _, expression := range c.removesExpr {
+	for _, expression := range c.exp.Removes {
 		result, err := expr.Run(expression, t)
 		if err != nil {
 			return false, fmt.Errorf("check remeove expression: %w", err)

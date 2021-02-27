@@ -3,13 +3,13 @@ module github.com/l3uddz/tqm
 go 1.16
 
 require (
-	github.com/KnutZuidema/go-qbittorrent v0.0.0-20190814183140-292286ded47f
 	github.com/antonmedv/expr v1.8.9
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/bobesa/go-domain-util v0.0.0-20190911083921-4033b5f7dd89
 	github.com/dustin/go-humanize v1.0.0
 	github.com/gdm85/go-libdeluge v0.5.4
 	github.com/golang/protobuf v1.4.3 // indirect
+	github.com/i0range/go-qbittorrent v0.0.0-20200829122403-167ccd7e67e8
 	github.com/knadh/koanf v0.15.0
 	github.com/magefile/mage v1.11.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
