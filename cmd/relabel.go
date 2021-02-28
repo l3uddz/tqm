@@ -11,6 +11,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	flagFilterName string
+)
+
 var relabelCmd = &cobra.Command{
 	Use:   "relabel [CLIENT]",
 	Short: "Check torrent client for torrents to relabel",
@@ -52,6 +56,13 @@ var relabelCmd = &cobra.Command{
 		clientFilter, err := getClientFilter(clientConfig)
 		if err != nil {
 			log.WithError(err).Fatal("Failed retrieving client filter")
+		}
+
+		if flagFilterName != "" {
+			clientFilter, err = getFilter(flagFilterName)
+			if err != nil {
+				log.WithError(err).Fatal("Failed retrieving specified filter")
+			}
 		}
 
 		// compile client filters
@@ -115,4 +126,6 @@ var relabelCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(relabelCmd)
+
+	relabelCmd.Flags().StringVar(&flagFilterName, "filter", "", "Filter to use instead of client")
 }

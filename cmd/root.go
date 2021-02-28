@@ -158,3 +158,12 @@ func getClientFilter(clientConfig map[string]interface{}) (*config.FilterConfigu
 
 	return &clientFilter, nil
 }
+
+func getFilter(filterName string) (*config.FilterConfiguration, error) {
+	clientFilter, ok := config.Config.Filters[filterName]
+	if !ok {
+		return nil, fmt.Errorf("failed finding configuration of filter: %+v", filterName)
+	}
+
+	return &clientFilter, nil
+}
