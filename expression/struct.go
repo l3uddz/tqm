@@ -5,10 +5,10 @@ import "github.com/antonmedv/expr/vm"
 type Expressions struct {
 	Ignores []*vm.Program
 	Removes []*vm.Program
-	Labels  map[string]*LabelExpression
+	Labels  []*LabelExpression
 }
 
 type LabelExpression struct {
-	Ignores []*vm.Program
+	Name    string
 	Updates []*vm.Program
 }

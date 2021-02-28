@@ -3,8 +3,8 @@ package config
 type FilterConfiguration struct {
 	Ignore []string
 	Remove []string
-	Label  map[string]struct {
-		Ignore []string
+	Label  []struct {
+		Name   string
 		Update []string
 	}
 }

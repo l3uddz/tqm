@@ -55,7 +55,7 @@ var cleanCmd = &cobra.Command{
 		}
 
 		// compile client filters
-		exp, err := expression.Compile(clientName, clientFilter)
+		exp, err := expression.Compile(clientFilter)
 		if err != nil {
 			log.WithError(err).Fatal("Failed compiling client filters")
 		}

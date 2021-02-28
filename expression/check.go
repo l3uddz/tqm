@@ -7,7 +7,7 @@ import (
 	"github.com/l3uddz/tqm/config"
 )
 
-func CheckTorrent(t *config.Torrent, exp []*vm.Program) (bool, error) {
+func CheckTorrentSingleMatch(t *config.Torrent, exp []*vm.Program) (bool, error) {
 	for _, expression := range exp {
 		result, err := expr.Run(expression, t)
 		if err != nil {
@@ -25,4 +25,24 @@ func CheckTorrent(t *config.Torrent, exp []*vm.Program) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func CheckTorrentAllMatch(t *config.Torrent, exp []*vm.Program) (bool, error) {
+	for _, expression := range exp {
+		result, err := expr.Run(expression, t)
+		if err != nil {
+			return false, fmt.Errorf("check expression: %w", err)
+		}
+
+		expResult, ok := result.(bool)
+		if !ok {
+			return false, fmt.Errorf("type assert expression result: %w", err)
+		}
+
+		if !expResult {
+			return false, nil
+		}
+	}
+
+	return true, nil
 }

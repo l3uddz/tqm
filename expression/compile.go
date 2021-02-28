@@ -6,7 +6,7 @@ import (
 	"github.com/l3uddz/tqm/config"
 )
 
-func Compile(clientName string, filter *config.FilterConfiguration) (*Expressions, error) {
+func Compile(filter *config.FilterConfiguration) (*Expressions, error) {
 	exprEnv := &config.Torrent{}
 	exp := new(Expressions)
 
@@ -31,31 +31,20 @@ func Compile(clientName string, filter *config.FilterConfiguration) (*Expression
 	}
 
 	// compile labels
-	exp.Labels = make(map[string]*LabelExpression, 0)
-	for n, labelExpr := range filter.Label {
-		le := new(LabelExpression)
-
-		// compile ignores
-		for _, ignoreExpr := range labelExpr.Ignore {
-			program, err := expr.Compile(ignoreExpr, expr.Env(exprEnv), expr.AsBool())
-			if err != nil {
-				return nil, fmt.Errorf("compile label ignore expression: %v: %q: %w", n, ignoreExpr, err)
-			}
-
-			le.Ignores = append(le.Ignores, program)
-		}
+	for _, labelExpr := range filter.Label {
+		le := &LabelExpression{Name: labelExpr.Name}
 
 		// compile updates
 		for _, updateExpr := range labelExpr.Update {
 			program, err := expr.Compile(updateExpr, expr.Env(exprEnv), expr.AsBool())
 			if err != nil {
-				return nil, fmt.Errorf("compile label update expression: %v: %q: %w", n, updateExpr, err)
+				return nil, fmt.Errorf("compile label update expression: %v: %q: %w", labelExpr.Name, updateExpr, err)
 			}
 
 			le.Updates = append(le.Updates, program)
 		}
 
-		exp.Labels[n] = le
+		exp.Labels = append(exp.Labels, le)
 	}
 
 	return exp, nil

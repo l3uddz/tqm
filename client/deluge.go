@@ -258,7 +258,7 @@ func (c *Deluge) GetFreeSpace() float64 {
 /* Filters */
 
 func (c *Deluge) ShouldIgnore(t *config.Torrent) (bool, error) {
-	match, err := expression.CheckTorrent(t, c.exp.Ignores)
+	match, err := expression.CheckTorrentSingleMatch(t, c.exp.Ignores)
 	if err != nil {
 		return true, fmt.Errorf("check ignore expression: %v: %w", t.Hash, err)
 	}
@@ -267,7 +267,7 @@ func (c *Deluge) ShouldIgnore(t *config.Torrent) (bool, error) {
 }
 
 func (c *Deluge) ShouldRemove(t *config.Torrent) (bool, error) {
-	match, err := expression.CheckTorrent(t, c.exp.Removes)
+	match, err := expression.CheckTorrentSingleMatch(t, c.exp.Removes)
 	if err != nil {
 		return false, fmt.Errorf("check remove expression: %v: %w", t.Hash, err)
 	}
@@ -276,17 +276,9 @@ func (c *Deluge) ShouldRemove(t *config.Torrent) (bool, error) {
 }
 
 func (c *Deluge) ShouldRelabel(t *config.Torrent) (string, bool, error) {
-	for label, exp := range c.exp.Labels {
-		// check ignores
-		match, err := expression.CheckTorrent(t, exp.Ignores)
-		if err != nil {
-			return "", false, fmt.Errorf("check ignore expression: %v: %w", t.Hash, err)
-		} else if match {
-			continue
-		}
-
+	for _, label := range c.exp.Labels {
 		// check update
-		match, err = expression.CheckTorrent(t, exp.Updates)
+		match, err := expression.CheckTorrentAllMatch(t, label.Updates)
 		if err != nil {
 			return "", false, fmt.Errorf("check update expression: %v: %w", t.Hash, err)
 		} else if !match {
@@ -294,7 +286,7 @@ func (c *Deluge) ShouldRelabel(t *config.Torrent) (string, bool, error) {
 		}
 
 		// we should re-label
-		return label, true, nil
+		return label.Name, true, nil
 	}
 
 	return "", false, nil

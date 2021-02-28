@@ -62,22 +62,21 @@ filters:
       # hdb
       - Label in ["autoremove-hdb"] && (Ratio > 3.0 || SeedingDays >= 15.0)
     label:
-      # permaseed-btn will become the torrents new label
-      permaseed-btn:
-        ignore:
-          - Label != "sonarr-imported"
-          - TrackerName != "landof.tv"
-          - not (Name contains "1080p")
-          - IsUnregistered()
+      # btn 1080p season packs to permaseed (all must evaluate to true)
+      - name: permaseed-btn
         update:
-          - len(Files) > 1
-      # autoremove-btn will become the torrents new label
-      autoremove-btn:
-        ignore:
-          - Label != "permaseed-btn"
-          - Seeds < 6
+          - Label == "sonarr-imported"
+          - TrackerName == "landof.tv"
+          - Name contains "1080p"
+          - len(Files) >= 3
+
+      # cleanup btn season packs to autoremove-btn (all must evaluate to true)
+      - name: autoremove-btn
         update:
+          - Label == "sonarr-imported"
+          - TrackerName == "landof.tv"
           - not (Name contains "1080p")
+          - len(Files) >= 3
 ```
 
 ## Supported Clients
