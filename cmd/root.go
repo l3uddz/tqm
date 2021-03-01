@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
 	"github.com/l3uddz/tqm/runtime"
 	"github.com/l3uddz/tqm/stringutils"
 	"os"
@@ -27,7 +25,8 @@ var (
 	flagDryRun bool
 
 	// Global vars
-	log *logrus.Entry
+	log         *logrus.Entry
+	initialized bool
 )
 
 var rootCmd = &cobra.Command{
@@ -160,30 +159,11 @@ func getClientFilter(clientConfig map[string]interface{}) (*config.FilterConfigu
 	return &clientFilter, nil
 }
 
-func compileExpressions(clientName string, filter *config.FilterConfiguration) ([]*vm.Program, []*vm.Program, error) {
-	exprEnv := &config.Torrent{}
-	var ignoresExpr []*vm.Program
-	var removesExpr []*vm.Program
-
-	// compile ignores
-	for _, ignoreExpr := range filter.Ignore {
-		program, err := expr.Compile(ignoreExpr, expr.Env(exprEnv), expr.AsBool())
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed compiling ignore expression for: %q", ignoreExpr)
-		}
-
-		ignoresExpr = append(ignoresExpr, program)
+func getFilter(filterName string) (*config.FilterConfiguration, error) {
+	clientFilter, ok := config.Config.Filters[filterName]
+	if !ok {
+		return nil, fmt.Errorf("failed finding configuration of filter: %+v", filterName)
 	}
 
-	// compile removes
-	for _, removeExpr := range filter.Remove {
-		program, err := expr.Compile(removeExpr, expr.Env(exprEnv), expr.AsBool())
-		if err != nil {
-			return nil, nil, errors.Wrapf(err, "failed compiling remove expression for: %q", removeExpr)
-		}
-
-		removesExpr = append(removesExpr, program)
-	}
-
-	return ignoresExpr, removesExpr, nil
+	return &clientFilter, nil
 }

@@ -21,7 +21,10 @@ var orphanCmd = &cobra.Command{
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		// init core
-		initCore(true)
+		if !initialized {
+			initCore(true)
+			initialized = true
+		}
 
 		// set log
 		log := logger.GetLogger("orphan")
@@ -62,7 +65,7 @@ var orphanCmd = &cobra.Command{
 		}
 
 		// load client object
-		c, err := client.NewClient(*clientType, clientName, nil, nil)
+		c, err := client.NewClient(*clientType, clientName, nil)
 		if err != nil {
 			log.WithError(err).Fatalf("Failed initializing client: %q", clientName)
 		}

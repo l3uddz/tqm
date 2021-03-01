@@ -2,16 +2,16 @@ package client
 
 import (
 	"fmt"
-	"github.com/antonmedv/expr/vm"
+	"github.com/l3uddz/tqm/expression"
 	"strings"
 )
 
-func NewClient(clientType string, clientName string, ignorsExpr []*vm.Program, removesExpr []*vm.Program) (Interface, error) {
+func NewClient(clientType string, clientName string, exp *expression.Expressions) (Interface, error) {
 	switch strings.ToLower(clientType) {
 	case "deluge":
-		return NewDeluge(clientName, ignorsExpr, removesExpr)
+		return NewDeluge(clientName, exp)
 	case "qbittorrent":
-		return NewQBittorrent(clientName, ignorsExpr, removesExpr)
+		return NewQBittorrent(clientName, exp)
 	default:
 		break
 	}

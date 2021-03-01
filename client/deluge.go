@@ -3,15 +3,13 @@ package client
 import (
 	"fmt"
 	"github.com/dustin/go-humanize"
+	"github.com/l3uddz/tqm/expression"
 	"path"
 	"time"
 
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
 	delugeclient "github.com/gdm85/go-libdeluge"
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/logger"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -36,28 +34,26 @@ type Deluge struct {
 	freeSpaceSet bool
 
 	// internal compiled filters
-	ignoresExpr []*vm.Program
-	removesExpr []*vm.Program
+	exp *expression.Expressions
 }
 
 /* Initializer */
 
-func NewDeluge(name string, ignoresExpr []*vm.Program, removesExpr []*vm.Program) (Interface, error) {
+func NewDeluge(name string, exp *expression.Expressions) (Interface, error) {
 	tc := Deluge{
-		log:         logger.GetLogger(name),
-		clientType:  "Deluge",
-		ignoresExpr: ignoresExpr,
-		removesExpr: removesExpr,
+		log:        logger.GetLogger(name),
+		clientType: "Deluge",
+		exp:        exp,
 	}
 
 	// load config
 	if err := config.K.Unmarshal(fmt.Sprintf("clients%s%s", config.Delimiter, name), &tc); err != nil {
-		return nil, errors.WithMessagef(err, "failed unmarshalling configuration for client: %s", name)
+		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
 
 	// validate config
 	if errs := config.ValidateStruct(tc); errs != nil {
-		return nil, fmt.Errorf("failed validating client configuration: %v", errs)
+		return nil, fmt.Errorf("validate config: %v", errs)
 	}
 
 	// init client
@@ -97,7 +93,7 @@ func (c *Deluge) Connect() error {
 	}
 
 	if err != nil {
-		return errors.WithMessage(err, "failed connecting to deluge")
+		return fmt.Errorf("login: %w", err)
 	}
 
 	// retrieve & set common label client
@@ -110,13 +106,13 @@ func (c *Deluge) Connect() error {
 	}
 
 	if err != nil {
-		return errors.WithMessage(err, "failed retrieving label plugin client")
+		return fmt.Errorf("get label plugin: %w", err)
 	}
 
 	// retrieve daemon version
 	daemonVersion, err := lc.DaemonVersion()
 	if err != nil {
-		return errors.WithMessage(err, "failed retrieving daemon version")
+		return fmt.Errorf("get daemon version: %w", err)
 	}
 	c.log.Debugf("Daemon Version: %v", daemonVersion)
 
@@ -129,14 +125,14 @@ func (c *Deluge) GetTorrents() (map[string]config.Torrent, error) {
 	c.log.Tracef("Retrieving torrents...")
 	t, err := c.client.TorrentsStatus(delugeclient.StateUnspecified, nil)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed retrieving torrents")
+		return nil, fmt.Errorf("get torrents: %w", err)
 	}
 	c.log.Tracef("Retrieved %d torrents", len(t))
 
 	// retrieve torrent labels
 	labels, err := c.client.GetTorrentsLabels(delugeclient.StateUnspecified, nil)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed retrieving labels for torrents")
+		return nil, fmt.Errorf("get torrent labels: %w", err)
 	}
 	c.log.Tracef("Retrieved labels for %d torrents", len(labels))
 
@@ -197,14 +193,14 @@ func (c *Deluge) GetTorrents() (map[string]config.Torrent, error) {
 func (c *Deluge) RemoveTorrent(hash string, deleteData bool) (bool, error) {
 	// pause torrent
 	if err := c.client.PauseTorrents(hash); err != nil {
-		return false, errors.Wrapf(err, "failed pausing torrent: %q", hash)
+		return false, fmt.Errorf("pause torrent: %v: %w", hash, err)
 	}
 
 	time.Sleep(1 * time.Second)
 
 	// resume torrent
 	if err := c.client.ResumeTorrents(hash); err != nil {
-		return false, errors.Wrapf(err, "failed resuming torrent: %q", hash)
+		return false, fmt.Errorf("resume torrent: %v: %w", hash, err)
 	}
 
 	// sleep before re-announcing torrent
@@ -212,21 +208,36 @@ func (c *Deluge) RemoveTorrent(hash string, deleteData bool) (bool, error) {
 
 	// re-announce torrent
 	if err := c.client.ForceReannounce([]string{hash}); err != nil {
-		return false, errors.Wrapf(err, "failed re-announcing torrent: %q", hash)
+		return false, fmt.Errorf("re-announce torrent: %v: %w", hash, err)
 	}
 
 	// sleep before removing torrent
 	time.Sleep(2 * time.Second)
 
 	// remove
-	return c.client.RemoveTorrent(hash, deleteData)
+	if ok, err := c.client.RemoveTorrent(hash, deleteData); err != nil {
+		return false, fmt.Errorf("remove torrent: %v: %w", hash, err)
+	} else if !ok {
+		return false, fmt.Errorf("remove torrent: %v", hash)
+	}
+
+	return true, nil
+}
+
+func (c *Deluge) SetTorrentLabel(hash string, label string) error {
+	// set label
+	if err := c.client.SetTorrentLabel(hash, label); err != nil {
+		return fmt.Errorf("set torrent label: %v: %w", label, err)
+	}
+
+	return nil
 }
 
 func (c *Deluge) GetCurrentFreeSpace(path string) (int64, error) {
 	// get free disk space
 	space, err := c.client.GetFreeSpace(path)
 	if err != nil {
-		return 0, errors.Wrapf(err, "failed retrieving free disk space for: %q", path)
+		return 0, fmt.Errorf("get free disk space: %v: %w", path, err)
 	}
 
 	// set internal free size
@@ -247,41 +258,36 @@ func (c *Deluge) GetFreeSpace() float64 {
 /* Filters */
 
 func (c *Deluge) ShouldIgnore(t *config.Torrent) (bool, error) {
-	for _, expression := range c.ignoresExpr {
-		result, err := expr.Run(expression, t)
-		if err != nil {
-			return true, errors.Wrap(err, "failed checking ignore expression")
-		}
-
-		expResult, ok := result.(bool)
-		if !ok {
-			return true, errors.New("failed type asserting ignore expression result")
-		}
-
-		if expResult {
-			return true, nil
-		}
+	match, err := expression.CheckTorrentSingleMatch(t, c.exp.Ignores)
+	if err != nil {
+		return true, fmt.Errorf("check ignore expression: %v: %w", t.Hash, err)
 	}
 
-	return false, nil
+	return match, nil
 }
 
 func (c *Deluge) ShouldRemove(t *config.Torrent) (bool, error) {
-	for _, expression := range c.removesExpr {
-		result, err := expr.Run(expression, t)
-		if err != nil {
-			return false, errors.Wrap(err, "failed checking remove expression")
-		}
-
-		expResult, ok := result.(bool)
-		if !ok {
-			return false, errors.New("failed type asserting remove expression result")
-		}
-
-		if expResult {
-			return true, nil
-		}
+	match, err := expression.CheckTorrentSingleMatch(t, c.exp.Removes)
+	if err != nil {
+		return false, fmt.Errorf("check remove expression: %v: %w", t.Hash, err)
 	}
 
-	return false, nil
+	return match, nil
+}
+
+func (c *Deluge) ShouldRelabel(t *config.Torrent) (string, bool, error) {
+	for _, label := range c.exp.Labels {
+		// check update
+		match, err := expression.CheckTorrentAllMatch(t, label.Updates)
+		if err != nil {
+			return "", false, fmt.Errorf("check update expression: %v: %w", t.Hash, err)
+		} else if !match {
+			continue
+		}
+
+		// we should re-label
+		return label.Name, true, nil
+	}
+
+	return "", false, nil
 }

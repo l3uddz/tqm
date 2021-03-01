@@ -5,23 +5,27 @@ import (
 	"github.com/dustin/go-humanize"
 	"github.com/l3uddz/tqm/client"
 	"github.com/l3uddz/tqm/config"
+	"github.com/l3uddz/tqm/expression"
 	"github.com/l3uddz/tqm/logger"
 	"github.com/l3uddz/tqm/torrentfilemap"
 	"github.com/spf13/cobra"
 )
 
-var manageCmd = &cobra.Command{
-	Use:   "manage [CLIENT]",
+var cleanCmd = &cobra.Command{
+	Use:   "clean [CLIENT]",
 	Short: "Check torrent client for torrents to remove",
 	Long:  `This command can be used to check a torrent clients queue for torrents to remove based on its configured filters.`,
 
 	Args: cobra.ExactArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		// init core
-		initCore(true)
+		if !initialized {
+			initCore(true)
+			initialized = true
+		}
 
 		// set log
-		log := logger.GetLogger("manage")
+		log := logger.GetLogger("clean")
 
 		// retrieve client object
 		clientName := args[0]
@@ -51,13 +55,13 @@ var manageCmd = &cobra.Command{
 		}
 
 		// compile client filters
-		ignoreExpressions, removeExpressions, err := compileExpressions(clientName, clientFilter)
+		exp, err := expression.Compile(clientFilter)
 		if err != nil {
 			log.WithError(err).Fatal("Failed compiling client filters")
 		}
 
 		// load client object
-		c, err := client.NewClient(*clientType, clientName, ignoreExpressions, removeExpressions)
+		c, err := client.NewClient(*clientType, clientName, exp)
 		if err != nil {
 			log.WithError(err).Fatalf("Failed initializing client: %q", clientName)
 		}
@@ -110,5 +114,5 @@ var manageCmd = &cobra.Command{
 }
 
 func init() {
-	rootCmd.AddCommand(manageCmd)
+	rootCmd.AddCommand(cleanCmd)
 }

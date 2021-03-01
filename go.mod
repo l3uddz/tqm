@@ -10,7 +10,7 @@ require (
 	github.com/gdm85/go-libdeluge v0.5.4
 	github.com/golang/protobuf v1.4.3 // indirect
 	github.com/knadh/koanf v0.15.0
-	github.com/l3uddz/go-qbittorrent v1.0.2
+	github.com/l3uddz/go-qbt v0.0.0-20210227193422-031ebabafe7c
 	github.com/magefile/mage v1.11.0 // indirect
 	github.com/mattn/go-colorable v0.1.8 // indirect
 	github.com/mgutz/ansi v0.0.0-20200706080929-d51e80ef957d // indirect
@@ -25,9 +25,9 @@ require (
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83 // indirect
-	golang.org/x/net v0.0.0-20210226101413-39120d07d75e // indirect
+	golang.org/x/net v0.0.0-20210226172049-e18ecbb05110 // indirect
 	golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93 // indirect
-	golang.org/x/sys v0.0.0-20210225134936-a50acf3fe073 // indirect
+	golang.org/x/sys v0.0.0-20210227040730-b0d1d43c014d // indirect
 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.0.0 // indirect

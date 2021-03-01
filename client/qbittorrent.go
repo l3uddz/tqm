@@ -2,15 +2,15 @@ package client
 
 import (
 	"fmt"
-	"github.com/antonmedv/expr"
-	"github.com/antonmedv/expr/vm"
 	"github.com/dustin/go-humanize"
-	"github.com/l3uddz/go-qbittorrent/qbt"
+	"github.com/l3uddz/go-qbt"
 	"github.com/l3uddz/tqm/config"
+	"github.com/l3uddz/tqm/expression"
 	"github.com/l3uddz/tqm/logger"
 	"github.com/l3uddz/tqm/sliceutils"
-	"github.com/pkg/errors"
+	"github.com/l3uddz/tqm/stringutils"
 	"github.com/sirupsen/logrus"
+	"io/ioutil"
 	"path/filepath"
 	"strings"
 	"time"
@@ -26,39 +26,39 @@ type QBittorrent struct {
 	// internal
 	log        *logrus.Entry
 	clientType string
-	client     *qbt.Client
+	client     *qbittorrent.Client
 
 	// set by cmd handler
 	freeSpaceGB  float64
 	freeSpaceSet bool
 
 	// internal compiled filters
-	ignoresExpr []*vm.Program
-	removesExpr []*vm.Program
+	exp *expression.Expressions
 }
 
 /* Initializer */
 
-func NewQBittorrent(name string, ignoresExpr []*vm.Program, removesExpr []*vm.Program) (Interface, error) {
+func NewQBittorrent(name string, exp *expression.Expressions) (Interface, error) {
 	tc := QBittorrent{
-		log:         logger.GetLogger(name),
-		clientType:  "qBittorrent",
-		ignoresExpr: ignoresExpr,
-		removesExpr: removesExpr,
+		log:        logger.GetLogger(name),
+		clientType: "qBittorrent",
+		exp:        exp,
 	}
 
 	// load config
 	if err := config.K.Unmarshal(fmt.Sprintf("clients%s%s", config.Delimiter, name), &tc); err != nil {
-		return nil, errors.WithMessagef(err, "failed unmarshalling configuration for client: %s", name)
+		return nil, fmt.Errorf("unmarshal config: %w", err)
 	}
 
 	// validate config
 	if errs := config.ValidateStruct(tc); errs != nil {
-		return nil, fmt.Errorf("failed validating client configuration: %v", errs)
+		return nil, fmt.Errorf("validate config: %v", errs)
 	}
 
 	// init client
-	tc.client = qbt.NewClient(*tc.Url)
+	qbl := logrus.New()
+	qbl.Out = ioutil.Discard
+	tc.client = qbittorrent.NewClient(strings.TrimSuffix(*tc.Url, "/"), qbl)
 
 	return &tc, nil
 }
@@ -71,18 +71,15 @@ func (c *QBittorrent) Type() string {
 
 func (c *QBittorrent) Connect() error {
 	// login
-	if err := c.client.Login(qbt.LoginOptions{
-		Username: *c.User,
-		Password: *c.Password,
-	}); err != nil {
-		return errors.WithMessage(err, "failed logging into client")
+	if err := c.client.Login(*c.User, *c.Password); err != nil {
+		return fmt.Errorf("login: %w", err)
 	}
 
 	// retrieve & validate api version
-	apiVersion, err := c.client.WebAPIVersion()
+	apiVersion, err := c.client.Application.GetAPIVersion()
 	if err != nil {
-		return errors.WithMessage(err, "failed retrieving api version")
-	} else if apiVersion < 2.2 {
+		return fmt.Errorf("get api version: %w", err)
+	} else if stringutils.Atof64(apiVersion[0:3], 0.0) < 2.2 {
 		return fmt.Errorf("unsupported webapi version: %v", apiVersion)
 	}
 
@@ -93,9 +90,9 @@ func (c *QBittorrent) Connect() error {
 func (c *QBittorrent) GetTorrents() (map[string]config.Torrent, error) {
 	// retrieve torrents from client
 	c.log.Tracef("Retrieving torrents...")
-	t, err := c.client.Torrents(nil)
+	t, err := c.client.Torrent.GetList(nil)
 	if err != nil {
-		return nil, errors.WithMessage(err, "failed retrieving torrents")
+		return nil, fmt.Errorf("get torrents: %w", err)
 	}
 	c.log.Tracef("Retrieved %d torrents", len(t))
 
@@ -105,19 +102,19 @@ func (c *QBittorrent) GetTorrents() (map[string]config.Torrent, error) {
 		t := t
 
 		// get additional torrent details
-		td, err := c.client.Torrent(t.Hash)
+		td, err := c.client.Torrent.GetProperties(t.Hash)
 		if err != nil {
-			return nil, errors.WithMessagef(err, "failed retrieving additional details for torrent: %q", t.Hash)
+			return nil, fmt.Errorf("get torrent properties: %v: %w", t.Hash, err)
 		}
 
-		ts, err := c.client.TorrentTrackers(t.Hash)
+		ts, err := c.client.Torrent.GetTrackers(t.Hash)
 		if err != nil {
-			return nil, errors.WithMessagef(err, "failed retrieving tracker details for torrent: %q", t.Hash)
+			return nil, fmt.Errorf("get torrent trackers: %v: %w", t.Hash, err)
 		}
 
-		tf, err := c.client.TorrentFiles(t.Hash)
+		tf, err := c.client.Torrent.GetContents(t.Hash)
 		if err != nil {
-			return nil, errors.WithMessagef(err, "failed retrieving file details for torrent: %q", t.Hash)
+			return nil, fmt.Errorf("get torrent files: %v: %w", t.Hash, err)
 		}
 
 		// parse tracker details
@@ -133,41 +130,40 @@ func (c *QBittorrent) GetTorrents() (map[string]config.Torrent, error) {
 
 			// use status of first enabled tracker
 			trackerName = parseTrackerDomain(tracker.URL)
-			trackerStatus = tracker.Msg
+			trackerStatus = tracker.Message
 			break
 		}
 
 		// added time
-		addedTime := time.Unix(td.AdditionDate, 0)
-		addedTimeSecs := int64(time.Since(addedTime).Seconds())
+		addedTimeSecs := int64(time.Since(td.AdditionDate).Seconds())
 
 		// torrent files
 		var files []string
 		for _, f := range tf {
-			files = append(files, filepath.Join(t.SavePath, f.Name))
+			files = append(files, filepath.Join(td.SavePath, f.Name))
 		}
 
 		// create torrent
 		torrent := config.Torrent{
 			Hash:            t.Hash,
 			Name:            t.Name,
-			Path:            t.SavePath,
-			TotalBytes:      t.Size,
-			DownloadedBytes: t.Size - t.AmountLeft,
-			State:           t.State,
+			Path:            td.SavePath,
+			TotalBytes:      int64(t.Size),
+			DownloadedBytes: int64(td.TotalDownloaded),
+			State:           string(t.State),
 			Files:           files,
-			Downloaded:      t.AmountLeft == 0,
-			Seeding:         sliceutils.StringSliceContains([]string{"uploading", "stalledUP"}, t.State, true),
-			Ratio:           td.ShareRatio,
+			Downloaded:      td.TotalDownloaded >= t.Size,
+			Seeding:         sliceutils.StringSliceContains([]string{"uploading", "stalledUP"}, string(t.State), true),
+			Ratio:           float32(td.ShareRatio),
 			AddedSeconds:    addedTimeSecs,
 			AddedHours:      float32(addedTimeSecs) / 60 / 60,
 			AddedDays:       float32(addedTimeSecs) / 60 / 60 / 24,
-			SeedingSeconds:  td.SeedingTime,
-			SeedingHours:    float32(td.SeedingTime) / 60 / 60,
-			SeedingDays:     float32(td.SeedingTime) / 60 / 60 / 24,
+			SeedingSeconds:  int64(td.SeedingTime.Seconds()),
+			SeedingHours:    float32(td.SeedingTime.Seconds()) / 60 / 60,
+			SeedingDays:     float32(td.SeedingTime.Seconds()) / 60 / 60 / 24,
 			Label:           t.Category,
-			Seeds:           td.SeedsTotal,
-			Peers:           td.PeersTotal,
+			Seeds:           int64(td.SeedsTotal),
+			Peers:           int64(td.PeersTotal),
 			// free space
 			FreeSpaceGB:  c.GetFreeSpace,
 			FreeSpaceSet: c.freeSpaceSet,
@@ -184,43 +180,56 @@ func (c *QBittorrent) GetTorrents() (map[string]config.Torrent, error) {
 
 func (c *QBittorrent) RemoveTorrent(hash string, deleteData bool) (bool, error) {
 	// pause torrent
-	if _, err := c.client.Pause([]string{hash}); err != nil {
-		return false, errors.Wrapf(err, "failed pausing torrent: %q", hash)
+	if err := c.client.Torrent.StopTorrents([]string{hash}); err != nil {
+		return false, fmt.Errorf("pause torrent: %v: %w", hash, err)
 	}
 
 	time.Sleep(1 * time.Second)
 
 	// resume torrent
-	if _, err := c.client.Resume([]string{hash}); err != nil {
-		return false, errors.Wrapf(err, "failed resuming torrent: %q", hash)
+	if err := c.client.Torrent.ResumeTorrents([]string{hash}); err != nil {
+		return false, fmt.Errorf("resume torrent: %v: %w", hash, err)
 	}
 
 	// sleep before re-announcing torrent
 	time.Sleep(2 * time.Second)
 
-	if _, err := c.client.Reannounce([]string{hash}); err != nil {
-		return false, errors.Wrapf(err, "failed re-announcing torrent: %q", hash)
+	if err := c.client.Torrent.ReannounceTorrents([]string{hash}); err != nil {
+		return false, fmt.Errorf("re-announce torrent: %v: %w", hash, err)
 	}
 
 	// sleep before removing torrent
 	time.Sleep(2 * time.Second)
 
 	// remove
-	return c.client.Delete([]string{hash}, deleteData)
+	if err := c.client.Torrent.DeleteTorrents([]string{hash}, deleteData); err != nil {
+		return false, fmt.Errorf("delete torrent: %v: %w", hash, err)
+	}
+
+	return true, nil
+}
+
+func (c *QBittorrent) SetTorrentLabel(hash string, label string) error {
+	// set label
+	if err := c.client.Torrent.SetCategories([]string{hash}, label); err != nil {
+		return fmt.Errorf("set torrent label: %v: %w", label, err)
+	}
+
+	return nil
 }
 
 func (c *QBittorrent) GetCurrentFreeSpace(path string) (int64, error) {
 	// get current main stats
-	data, err := c.client.SyncMainData()
+	data, err := c.client.Sync.GetMainData(0)
 	if err != nil {
-		return 0, errors.Wrapf(err, "failed retrieving maindata")
+		return 0, fmt.Errorf("get main data: %w", err)
 	}
 
 	// set internal free size
 	c.freeSpaceGB = float64(data.ServerState.FreeSpaceOnDisk) / humanize.GiByte
 	c.freeSpaceSet = true
 
-	return data.ServerState.FreeSpaceOnDisk, nil
+	return int64(data.ServerState.FreeSpaceOnDisk), nil
 }
 
 func (c *QBittorrent) AddFreeSpace(bytes int64) {
@@ -234,41 +243,36 @@ func (c *QBittorrent) GetFreeSpace() float64 {
 /* Filters */
 
 func (c *QBittorrent) ShouldIgnore(t *config.Torrent) (bool, error) {
-	for _, expression := range c.ignoresExpr {
-		result, err := expr.Run(expression, t)
-		if err != nil {
-			return true, errors.Wrap(err, "failed checking ignore expression")
-		}
-
-		expResult, ok := result.(bool)
-		if !ok {
-			return true, errors.New("failed type asserting ignore expression result")
-		}
-
-		if expResult {
-			return true, nil
-		}
+	match, err := expression.CheckTorrentSingleMatch(t, c.exp.Ignores)
+	if err != nil {
+		return true, fmt.Errorf("check ignore expression: %v: %w", t.Hash, err)
 	}
 
-	return false, nil
+	return match, nil
 }
 
 func (c *QBittorrent) ShouldRemove(t *config.Torrent) (bool, error) {
-	for _, expression := range c.removesExpr {
-		result, err := expr.Run(expression, t)
-		if err != nil {
-			return false, errors.Wrap(err, "failed checking remove expression")
-		}
-
-		expResult, ok := result.(bool)
-		if !ok {
-			return false, errors.New("failed type asserting remove expression result")
-		}
-
-		if expResult {
-			return true, nil
-		}
+	match, err := expression.CheckTorrentSingleMatch(t, c.exp.Removes)
+	if err != nil {
+		return false, fmt.Errorf("check remove expression: %v: %w", t.Hash, err)
 	}
 
-	return false, nil
+	return match, nil
+}
+
+func (c *QBittorrent) ShouldRelabel(t *config.Torrent) (string, bool, error) {
+	for _, label := range c.exp.Labels {
+		// check update
+		match, err := expression.CheckTorrentAllMatch(t, label.Updates)
+		if err != nil {
+			return "", false, fmt.Errorf("check update expression: %v: %w", t.Hash, err)
+		} else if !match {
+			continue
+		}
+
+		// we should re-label
+		return label.Name, true, nil
+	}
+
+	return "", false, nil
 }
