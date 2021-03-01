@@ -59,15 +59,15 @@ fetch: ## Fetch vendor files
 	go mod vendor
 
 .PHONY: release
-release: check_goreleaser fetch ## Generate a release, but don't publish
+release: check_goreleaser ## Generate a release, but don't publish
 	goreleaser --skip-validate --skip-publish --rm-dist
 
 .PHONY: publish
-publish: check_goreleaser fetch ## Generate a release, and publish
+publish: check_goreleaser ## Generate a release, and publish
 	goreleaser --rm-dist
 
 .PHONY: snapshot
-snapshot: check_goreleaser fetch ## Generate a snapshot release
+snapshot: check_goreleaser ## Generate a snapshot release
 	goreleaser --snapshot --skip-publish --rm-dist
 
 .PHONY: help
