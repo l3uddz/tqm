@@ -20,8 +20,8 @@ import (
 
 type QBittorrent struct {
 	Url      *string `validate:"required"`
-	User     *string
-	Password *string
+	User     string
+	Password string
 
 	// internal
 	log        *logrus.Entry
@@ -71,7 +71,7 @@ func (c *QBittorrent) Type() string {
 
 func (c *QBittorrent) Connect() error {
 	// login
-	if err := c.client.Login(*c.User, *c.Password); err != nil {
+	if err := c.client.Login(c.User, c.Password); err != nil {
 		return fmt.Errorf("login: %w", err)
 	}
 
