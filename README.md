@@ -81,9 +81,8 @@ filters:
 
 ## Supported Clients
 
-- [x] Deluge
-- [x] qBittorrent
-- [ ] rTorrent
+- Deluge
+- qBittorrent
 
 ## Example Commands
 
@@ -111,8 +110,8 @@ filters:
 
 `FreeSpaceSet` and `FreeSpaceGB()` are currently only supported for the following clients (when `free_space_path` is set):
 
-- [x] Deluge
-- [x] qBittorrent
+- Deluge
+- qBittorrent
 
 `FreeSpaceGB()` will only increase as torrents are hard-removed.
 

@@ -20,8 +20,8 @@ import (
 
 type QBittorrent struct {
 	Url      *string `validate:"required"`
-	User     *string `validate:"required"`
-	Password *string `validate:"required"`
+	User     *string
+	Password *string
 
 	// internal
 	log        *logrus.Entry

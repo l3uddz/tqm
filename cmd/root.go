@@ -9,7 +9,6 @@ import (
 
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/logger"
-	paths "github.com/l3uddz/tqm/pathutils"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -18,8 +17,8 @@ import (
 var (
 	// Global flags
 	flagLogLevel     = 0
-	flagConfigFolder = paths.GetCurrentBinaryPath()
 	flagConfigFile   = "config.yaml"
+	flagConfigFolder = config.GetDefaultConfigDirectory("tqm", flagConfigFile)
 	flagLogFile      = "activity.log"
 
 	flagDryRun bool

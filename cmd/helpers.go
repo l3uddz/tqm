@@ -119,7 +119,7 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 		removeMode := "Soft"
 
 		if uniqueTorrent {
-			// this torrent contains files found within other torrents (dont remove its data)
+			// this torrent does not contains files found within other torrents (remove its data)
 			removeMode = "Hard"
 		}
 
