@@ -54,6 +54,13 @@ var cleanCmd = &cobra.Command{
 			log.WithError(err).Fatal("Failed retrieving client filter")
 		}
 
+		if flagFilterName != "" {
+			clientFilter, err = getFilter(flagFilterName)
+			if err != nil {
+				log.WithError(err).Fatal("Failed retrieving specified filter")
+			}
+		}
+
 		// compile client filters
 		exp, err := expression.Compile(clientFilter)
 		if err != nil {
@@ -115,4 +122,6 @@ var cleanCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(cleanCmd)
+
+	cleanCmd.Flags().StringVar(&flagFilterName, "filter", "", "Filter to use instead of client")
 }

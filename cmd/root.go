@@ -21,6 +21,7 @@ var (
 	flagConfigFolder = config.GetDefaultConfigDirectory("tqm", flagConfigFile)
 	flagLogFile      = "activity.log"
 
+	flagFilterName string
 	flagDryRun bool
 
 	// Global vars

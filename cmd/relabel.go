@@ -11,10 +11,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	flagFilterName string
-)
-
 var relabelCmd = &cobra.Command{
 	Use:   "relabel [CLIENT]",
 	Short: "Check torrent client for torrents to relabel",
