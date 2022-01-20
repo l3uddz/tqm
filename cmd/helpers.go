@@ -134,7 +134,7 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 		}
 
 		log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / "+
-			"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
+			"Tracker State: %s / Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.State, t.TrackerStatus)
 
 		if !flagDryRun {
 			// do remove

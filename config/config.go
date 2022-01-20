@@ -10,8 +10,9 @@ import (
 )
 
 type Configuration struct {
-	Clients map[string]map[string]interface{}
-	Filters map[string]FilterConfiguration
+	Clients  map[string]map[string]interface{}
+	Filters  map[string]FilterConfiguration
+	Trackers map[string]TrackerConfiguration
 }
 
 /* Vars */
