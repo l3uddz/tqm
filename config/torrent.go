@@ -64,7 +64,7 @@ func (t *Torrent) IsUnregistered() bool {
 			return true
 		}
 	}
-	if strings.Contains(t.TrackerName, "tracker.beyond-hd.me") {
+	if strings.Contains(t.TrackerName, "beyond-hd.me") {
 		return IsUnregisteredAPI(t)
 	}
 
@@ -109,7 +109,7 @@ type BHDResponse struct {
 }
 
 func IsUnregisteredAPI(t *Torrent) bool {
-	if strings.Contains(t.TrackerName, "tracker.beyond-hd.me") {
+	if strings.Contains(t.TrackerName, "beyond-hd.me") {
 		apikey := Config.Trackers["BHD"].APIKey
 		httpposturl := "https://beyond-hd.me/api/torrents/" + apikey
 
