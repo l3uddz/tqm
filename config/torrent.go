@@ -142,7 +142,6 @@ func IsUnregisteredAPI(t *Torrent) bool {
 		}
 
 		if resultParse.TotalResults < 1 {
-			log.Debug("API shows torrent was removed")
 			return true
 		}
 	}
