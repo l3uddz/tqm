@@ -78,6 +78,17 @@ filters:
           - not (Name contains "1080p")
           - len(Files) >= 3
 ```
+## Optional - Tracker Configuration
+```yaml
+trackers:
+  bhd:
+    api_key: your-api-key
+```
+Allows tqm to validate if a torrent was removed from the tracker using the tracker's own API.
+
+Currently implements:
+- Beyond-HD
+
 
 ## Supported Clients
 

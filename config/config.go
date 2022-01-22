@@ -7,11 +7,13 @@ import (
 	"github.com/knadh/koanf/providers/file"
 	"github.com/l3uddz/tqm/logger"
 	"github.com/l3uddz/tqm/stringutils"
+	"github.com/l3uddz/tqm/tracker"
 )
 
 type Configuration struct {
-	Clients map[string]map[string]interface{}
-	Filters map[string]FilterConfiguration
+	Clients  map[string]map[string]interface{}
+	Filters  map[string]FilterConfiguration
+	Trackers tracker.Config
 }
 
 /* Vars */

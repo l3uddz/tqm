@@ -1,0 +1,32 @@
+package tracker
+
+var (
+	trackers []Interface
+)
+
+func Init(cfg Config) error {
+	trackers = make([]Interface, 0)
+
+	// load trackers
+	if cfg.BHD.Key != "" {
+		trackers = append(trackers, NewBHD(cfg.BHD))
+	}
+
+	return nil
+}
+
+func Get(host string) Interface {
+	// find tracker for this host
+	for _, tracker := range trackers {
+		if tracker.Check(host) {
+			return tracker
+		}
+	}
+
+	// no tracker found
+	return nil
+}
+
+func Loaded() int {
+	return len(trackers)
+}

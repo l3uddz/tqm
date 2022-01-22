@@ -8,6 +8,7 @@ import (
 	"github.com/l3uddz/tqm/expression"
 	"github.com/l3uddz/tqm/logger"
 	"github.com/l3uddz/tqm/torrentfilemap"
+	"github.com/l3uddz/tqm/tracker"
 	"github.com/spf13/cobra"
 )
 
@@ -73,7 +74,7 @@ var cleanCmd = &cobra.Command{
 			log.WithError(err).Fatalf("Failed initializing client: %q", clientName)
 		}
 
-		log.Infof("Initialized client %q, type: %s", clientName, c.Type())
+		log.Infof("Initialized client %q, type: %s (%d trackers)", clientName, c.Type(), tracker.Loaded())
 
 		// connect to client
 		if err := c.Connect(); err != nil {

@@ -1,6 +1,7 @@
 package config
 
 import (
+	"github.com/l3uddz/tqm/tracker"
 	"strings"
 )
 
@@ -52,11 +53,31 @@ func (t *Torrent) IsUnregistered() bool {
 		return false
 	}
 
+	// check hardcoded unregistered statuses
 	status := strings.ToLower(t.TrackerStatus)
 	for _, v := range unregisteredStatuses {
 		// unregistered tracker status found?
 		if strings.Contains(status, v) {
 			return true
+		}
+	}
+
+	// check tracker api (if available)
+	if tr := tracker.Get(t.TrackerName); tr != nil {
+		tt := &tracker.Torrent{
+			Hash:            t.Hash,
+			Name:            t.Name,
+			TotalBytes:      t.TotalBytes,
+			DownloadedBytes: t.DownloadedBytes,
+			State:           t.State,
+			Downloaded:      t.Downloaded,
+			Seeding:         t.Seeding,
+			TrackerName:     t.TrackerName,
+			TrackerStatus:   t.State,
+		}
+
+		if err, ur := tr.IsUnregistered(tt); err == nil {
+			return ur
 		}
 	}
 
