@@ -13,8 +13,12 @@ jobs:
     steps:
       # dependencies
       - name: goreleaser
-        run: |
-          curl -sfL https://install.goreleaser.com/github.com/goreleaser/goreleaser.sh | sudo sh -s -- -b /usr/local/bin
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          install-only: true
+
+      - name: goreleaser version
+        run: goreleaser -v
 
       # checkout
       - name: checkout
