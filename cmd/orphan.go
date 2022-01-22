@@ -8,6 +8,7 @@ import (
 	"github.com/l3uddz/tqm/logger"
 	paths "github.com/l3uddz/tqm/pathutils"
 	"github.com/l3uddz/tqm/torrentfilemap"
+	"github.com/l3uddz/tqm/tracker"
 	"github.com/spf13/cobra"
 	"os"
 	"strings"
@@ -70,7 +71,7 @@ var orphanCmd = &cobra.Command{
 			log.WithError(err).Fatalf("Failed initializing client: %q", clientName)
 		}
 
-		log.Infof("Initialized client %q, type: %s", clientName, c.Type())
+		log.Infof("Initialized client %q, type: %s (%d trackers)", clientName, c.Type(), tracker.Loaded())
 
 		// connect to client
 		if err := c.Connect(); err != nil {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/l3uddz/tqm/runtime"
 	"github.com/l3uddz/tqm/stringutils"
+	"github.com/l3uddz/tqm/tracker"
 	"os"
 	"path/filepath"
 
@@ -22,7 +23,7 @@ var (
 	flagLogFile      = "activity.log"
 
 	flagFilterName string
-	flagDryRun bool
+	flagDryRun     bool
 
 	// Global vars
 	log         *logrus.Entry
@@ -72,6 +73,11 @@ func initCore(showAppInfo bool) {
 	// Init Config
 	if err := config.Init(flagConfigFile); err != nil {
 		log.WithError(err).Fatal("Failed to initialize config")
+	}
+
+	// Init Trackers
+	if err := tracker.Init(config.Config.Trackers); err != nil {
+		log.WithError(err).Fatal("Failed to initialize trackers")
 	}
 
 	// Show App Info
