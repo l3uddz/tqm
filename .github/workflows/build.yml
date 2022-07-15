@@ -16,6 +16,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           install-only: true
+          version: 1.7.0
 
       - name: goreleaser version
         run: goreleaser -v
@@ -30,7 +31,7 @@ jobs:
       - name: go
         uses: actions/setup-go@v1
         with:
-          go-version: 1.17
+          go-version: 1.18
 
       - name: go info
         run: |
