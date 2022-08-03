@@ -2,16 +2,18 @@ package cmd
 
 import (
 	"encoding/json"
+	"os"
+	"strings"
+
 	"github.com/dustin/go-humanize"
+	"github.com/spf13/cobra"
+
 	"github.com/l3uddz/tqm/client"
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/logger"
 	paths "github.com/l3uddz/tqm/pathutils"
 	"github.com/l3uddz/tqm/torrentfilemap"
 	"github.com/l3uddz/tqm/tracker"
-	"github.com/spf13/cobra"
-	"os"
-	"strings"
 )
 
 var orphanCmd = &cobra.Command{

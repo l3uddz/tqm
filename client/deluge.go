@@ -2,15 +2,18 @@ package client
 
 import (
 	"fmt"
-	"github.com/dustin/go-humanize"
-	"github.com/l3uddz/tqm/expression"
 	"path"
 	"time"
 
+	"github.com/dustin/go-humanize"
+
+	"github.com/l3uddz/tqm/expression"
+
 	delugeclient "github.com/gdm85/go-libdeluge"
+	"github.com/sirupsen/logrus"
+
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/logger"
-	"github.com/sirupsen/logrus"
 )
 
 /* Struct */

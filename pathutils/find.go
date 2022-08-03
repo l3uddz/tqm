@@ -2,10 +2,11 @@ package paths
 
 import (
 	"fmt"
-	"github.com/l3uddz/tqm/logger"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/l3uddz/tqm/logger"
 )
 
 /* Structs */

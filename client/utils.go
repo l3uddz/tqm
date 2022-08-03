@@ -1,11 +1,12 @@
 package client
 
 import (
-	"github.com/bobesa/go-domain-util/domainutil"
-	"github.com/sirupsen/logrus"
 	"net"
 	"net/url"
 	"strings"
+
+	"github.com/bobesa/go-domain-util/domainutil"
+	"github.com/sirupsen/logrus"
 )
 
 func parseTrackerDomain(trackerHost string) string {

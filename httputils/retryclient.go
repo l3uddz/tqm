@@ -1,12 +1,14 @@
 package httputils
 
 import (
-	"github.com/hashicorp/go-retryablehttp"
-	"github.com/l3uddz/tqm/runtime"
-	"github.com/sirupsen/logrus"
-	"go.uber.org/ratelimit"
 	"net/http"
 	"time"
+
+	"github.com/hashicorp/go-retryablehttp"
+	"github.com/sirupsen/logrus"
+	"go.uber.org/ratelimit"
+
+	"github.com/l3uddz/tqm/runtime"
 )
 
 func NewRetryableHttpClient(timeout time.Duration, rl ratelimit.Limiter, log *logrus.Entry) *http.Client {
@@ -39,5 +41,5 @@ func NewRetryableHttpClient(timeout time.Duration, rl ratelimit.Limiter, log *lo
 	}
 	retryClient.HTTPClient.Timeout = timeout
 	retryClient.Logger = nil
-	return retryClient.HTTPClient
+	return retryClient.StandardClient()
 }

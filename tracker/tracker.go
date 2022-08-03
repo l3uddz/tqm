@@ -11,6 +11,9 @@ func Init(cfg Config) error {
 	if cfg.BHD.Key != "" {
 		trackers = append(trackers, NewBHD(cfg.BHD))
 	}
+	if cfg.PTP.User != "" && cfg.PTP.Key != "" {
+		trackers = append(trackers, NewPTP(cfg.PTP))
+	}
 
 	return nil
 }

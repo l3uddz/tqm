@@ -83,11 +83,15 @@ filters:
 trackers:
   bhd:
     api_key: your-api-key
+  ptp:
+    api_user: your-api-user
+    api_key: your-api-key
 ```
 Allows tqm to validate if a torrent was removed from the tracker using the tracker's own API.
 
 Currently implements:
 - Beyond-HD
+- PTP
 
 
 ## Supported Clients

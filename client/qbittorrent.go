@@ -2,18 +2,20 @@ package client
 
 import (
 	"fmt"
+	"io/ioutil"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/dustin/go-humanize"
 	"github.com/l3uddz/go-qbt"
+	"github.com/sirupsen/logrus"
+
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/expression"
 	"github.com/l3uddz/tqm/logger"
 	"github.com/l3uddz/tqm/sliceutils"
 	"github.com/l3uddz/tqm/stringutils"
-	"github.com/sirupsen/logrus"
-	"io/ioutil"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 /* Struct */

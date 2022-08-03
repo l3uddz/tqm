@@ -2,14 +2,16 @@ package cmd
 
 import (
 	"encoding/json"
+
 	"github.com/dustin/go-humanize"
+	"github.com/spf13/cobra"
+
 	"github.com/l3uddz/tqm/client"
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/expression"
 	"github.com/l3uddz/tqm/logger"
 	"github.com/l3uddz/tqm/torrentfilemap"
 	"github.com/l3uddz/tqm/tracker"
-	"github.com/spf13/cobra"
 )
 
 var relabelCmd = &cobra.Command{

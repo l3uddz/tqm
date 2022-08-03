@@ -2,6 +2,7 @@ package tracker
 
 type Config struct {
 	BHD BHDConfig
+	PTP PTPConfig
 }
 
 type Torrent struct {

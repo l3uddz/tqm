@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"time"
+
 	"github.com/dustin/go-humanize"
+	"github.com/sirupsen/logrus"
+
 	"github.com/l3uddz/tqm/client"
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/torrentfilemap"
-	"github.com/sirupsen/logrus"
-	"time"
 )
 
 // relabel torrent that meet required filters
