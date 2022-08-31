@@ -44,6 +44,8 @@ filters:
       - SeedingHours < 26 && !IsUnregistered()
       # permaseed / un-sorted (unless torrent has been deleted)
       - Label startsWith "permaseed-" && !IsUnregistered()
+    # Filter based on qbittorrent tags (only qbit at the moment)
+      - '"permaseed" in Tags && !IsUnregistered()'
     remove:
       # general
       - IsUnregistered()
@@ -77,6 +79,22 @@ filters:
           - TrackerName == "landof.tv"
           - not (Name contains "1080p")
           - len(Files) >= 3
+    # Tags are currently only supported in qbit
+    tag:
+      - name: low-seed
+      # This must be set
+      # "mode: full" means tag will be added to
+      # torrent if matched and removed from torrent if not
+      # use `add` or `remove` to only add/remove respectivly
+      # NOTE: Mode does not change the way torrents are flagged,
+      # meaning, even with "mode: remove",
+      # tags will be removed if the torrent does NOT match the conditions.
+      # "mode: remove" simply means that tags will not be added
+      # to torrents that do match.
+        mode: full
+        update:
+          - Seeds <= 3
+
 ```
 ## Optional - Tracker Configuration
 ```yaml
@@ -113,7 +131,13 @@ Currently implements:
 
 `tqm relabel qbt`
 
-3. Orphan - Retrieve torrent client queue and local files/folders in download_path, remove orphan files/folders
+3. Retag - Retrieve torrent client queue and retag torrents matching its configured filters
+
+`tqm retag qbt --dry-run`
+
+`tqm retag qbt`
+
+4. Orphan - Retrieve torrent client queue and local files/folders in download_path, remove orphan files/folders
 
 `tqm orphan qbt --dry-run`
 
