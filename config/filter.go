@@ -7,4 +7,9 @@ type FilterConfiguration struct {
 		Name   string
 		Update []string
 	}
+	Tag []struct {
+		Name   string
+		Mode   string
+		Update []string
+	}
 }

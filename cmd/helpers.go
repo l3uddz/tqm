@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"strings"
 	"time"
 
 	"github.com/dustin/go-humanize"
@@ -10,6 +11,76 @@ import (
 	"github.com/l3uddz/tqm/config"
 	"github.com/l3uddz/tqm/torrentfilemap"
 )
+
+func removeSlice(slice []string, remove []string) []string {
+	for _, item := range remove {
+		for i, v := range slice {
+			if v == item {
+				slice = append(slice[:i], slice[i+1:]...)
+			}
+		}
+	}
+	return slice
+}
+
+// retag torrent that meet required filters
+func retagEligibleTorrents(log *logrus.Entry, c client.TagInterface, torrents map[string]config.Torrent,
+	tfm *torrentfilemap.TorrentFileMap) error {
+	// vars
+	ignoredTorrents := 0
+	retaggedTorrents := 0
+	errorRetaggedTorrents := 0
+
+	// iterate torrents
+	for h, t := range torrents {
+		// should we retag torrent?
+		retagInfo, retag, err := c.ShouldRetag(&t)
+		if err != nil {
+			// error while determining whether to relabel torrent
+			log.WithError(err).Errorf("Failed determining whether to retag: %+v", t)
+			continue
+		} else if !retag {
+			// torrent did not meet the retag filters
+			log.Tracef("Not retagging %s: %s", h, t.Name)
+			ignoredTorrents++
+			continue
+		}
+
+		// retag
+		log.Info("-----")
+		log.Infof("Retagging: %q - New Tags: %s", t.Name, strings.Join(append(removeSlice(t.Tags, retagInfo.Remove), retagInfo.Add...), ", "))
+		log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tags: %s / Tracker: %s / "+
+			"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, strings.Join(t.Tags, ", "), t.TrackerName, t.TrackerStatus)
+
+		if !flagDryRun {
+			error := 0
+			if err := c.AddTags(t.Hash, retagInfo.Add); err != nil {
+				log.WithError(err).Fatalf("Failed adding tags to torrent: %+v", t)
+				error = 1
+				continue
+			}
+
+			if err := c.RemoveTags(t.Hash, retagInfo.Remove); err != nil {
+				log.WithError(err).Fatalf("Failed remove tags from torrent: %+v", t)
+				error = 1
+				continue
+			}
+
+			errorRetaggedTorrents += error
+			log.Info("Retagged")
+		} else {
+			log.Warn("Dry-run enabled, skipping retag...")
+		}
+
+		retaggedTorrents++
+	}
+
+	// show result
+	log.Info("-----")
+	log.Infof("Ignored torrents: %d", ignoredTorrents)
+	log.Infof("Retagged torrents: %d, %d failures", retaggedTorrents, errorRetaggedTorrents)
+	return nil
+}
 
 // relabel torrent that meet required filters
 func relabelEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[string]config.Torrent,
@@ -46,8 +117,8 @@ func relabelEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map
 		// relabel
 		log.Info("-----")
 		log.Infof("Relabeling: %q - %s", t.Name, label)
-		log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / "+
-			"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
+		log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tags: %s / Tracker: %s / "+
+			"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, strings.Join(t.Tags, ", "), t.TrackerName, t.TrackerStatus)
 
 		if !flagDryRun {
 			if err := c.SetTorrentLabel(t.Hash, label); err != nil {
@@ -135,8 +206,8 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 				humanize.IBytes(uint64(t.DownloadedBytes)), t.FreeSpaceGB())
 		}
 
-		log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tracker: %s / "+
-			"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, t.TrackerName, t.TrackerStatus)
+		log.Infof("Ratio: %.3f / Seed days: %.3f / Seeds: %d / Label: %s / Tags: %s / Tracker: %s / "+
+			"Tracker Status: %q", t.Ratio, t.SeedingDays, t.Seeds, t.Label, strings.Join(t.Tags, ", "), t.TrackerName, t.TrackerStatus)
 
 		if !flagDryRun {
 			// do remove

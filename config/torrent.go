@@ -1,8 +1,10 @@
 package config
 
 import (
-	"github.com/l3uddz/tqm/tracker"
 	"strings"
+
+	"github.com/l3uddz/tqm/sliceutils"
+	"github.com/l3uddz/tqm/tracker"
 )
 
 var (
@@ -26,6 +28,7 @@ type Torrent struct {
 	DownloadedBytes int64    `json:"DownloadedBytes"`
 	State           string   `json:"State"`
 	Files           []string `json:"Files"`
+	Tags            []string `json:"Tags"`
 	Downloaded      bool     `json:"Downloaded"`
 	Seeding         bool     `json:"Seeding"`
 	Ratio           float32  `json:"Ratio"`
@@ -78,6 +81,26 @@ func (t *Torrent) IsUnregistered() bool {
 
 		if err, ur := tr.IsUnregistered(tt); err == nil {
 			return ur
+		}
+	}
+
+	return false
+}
+
+func (t *Torrent) HasAllTags(tags ...string) bool {
+	for _, v := range tags {
+		if !sliceutils.StringSliceContains(t.Tags, v, true) {
+			return false
+		}
+	}
+
+	return true
+}
+
+func (t *Torrent) HasAnyTag(tags ...string) bool {
+	for _, v := range tags {
+		if sliceutils.StringSliceContains(t.Tags, v, true) {
+			return true
 		}
 	}
 

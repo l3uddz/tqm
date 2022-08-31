@@ -49,5 +49,22 @@ func Compile(filter *config.FilterConfiguration) (*Expressions, error) {
 		exp.Labels = append(exp.Labels, le)
 	}
 
+	// compile tags
+	for _, tagExpr := range filter.Tag {
+		le := &TagExpression{Name: tagExpr.Name, Mode: tagExpr.Mode}
+
+		// compile updates
+		for _, updateExpr := range tagExpr.Update {
+			program, err := expr.Compile(updateExpr, expr.Env(exprEnv), expr.AsBool())
+			if err != nil {
+				return nil, fmt.Errorf("compile tag update expression: %v: %q: %w", tagExpr.Name, updateExpr, err)
+			}
+
+			le.Updates = append(le.Updates, program)
+		}
+
+		exp.Tags = append(exp.Tags, le)
+	}
+
 	return exp, nil
 }
