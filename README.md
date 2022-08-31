@@ -44,7 +44,7 @@ filters:
       - SeedingHours < 26 && !IsUnregistered()
       # permaseed / un-sorted (unless torrent has been deleted)
       - Label startsWith "permaseed-" && !IsUnregistered()
-    # Filter based on qbittorrent tags (only qbit at the moment)
+      # Filter based on qbittorrent tags (only qbit at the moment)
       - '"permaseed" in Tags && !IsUnregistered()'
     remove:
       # general
@@ -63,6 +63,9 @@ filters:
       - Label in ["autoremove-btn"] && (Ratio > 3.0 || SeedingDays >= 15.0)
       # hdb
       - Label in ["autoremove-hdb"] && (Ratio > 3.0 || SeedingDays >= 15.0)
+      # Qbit tag utilities
+      - HasAllTags("480p", "bad-encode") # match if all tags are present
+      - HasAnyTag("remove-me", "gross") # match if at least 1 tag is present
     label:
       # btn 1080p season packs to permaseed (all must evaluate to true)
       - name: permaseed-btn
@@ -79,7 +82,7 @@ filters:
           - TrackerName == "landof.tv"
           - not (Name contains "1080p")
           - len(Files) >= 3
-    # Tags are currently only supported in qbit
+    # Change qbit tags based on filters
     tag:
       - name: low-seed
       # This must be set
