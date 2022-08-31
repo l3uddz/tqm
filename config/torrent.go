@@ -1,8 +1,9 @@
 package config
 
 import (
-	"github.com/l3uddz/tqm/tracker"
 	"strings"
+
+	"github.com/l3uddz/tqm/tracker"
 )
 
 var (
@@ -26,6 +27,7 @@ type Torrent struct {
 	DownloadedBytes int64    `json:"DownloadedBytes"`
 	State           string   `json:"State"`
 	Files           []string `json:"Files"`
+	Tags            []string `json:"Tags"`
 	Downloaded      bool     `json:"Downloaded"`
 	Seeding         bool     `json:"Seeding"`
 	Ratio           float32  `json:"Ratio"`

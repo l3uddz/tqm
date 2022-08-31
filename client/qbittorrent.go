@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/l3uddz/go-qbt"
+	qbittorrent "github.com/l3uddz/go-qbt"
 	"github.com/sirupsen/logrus"
 
 	"github.com/l3uddz/tqm/config"
@@ -40,7 +40,7 @@ type QBittorrent struct {
 
 /* Initializer */
 
-func NewQBittorrent(name string, exp *expression.Expressions) (Interface, error) {
+func NewQBittorrent(name string, exp *expression.Expressions) (TagInterface, error) {
 	tc := QBittorrent{
 		log:        logger.GetLogger(name),
 		clientType: "qBittorrent",
@@ -146,6 +146,12 @@ func (c *QBittorrent) GetTorrents() (map[string]config.Torrent, error) {
 		}
 
 		// create torrent
+		var tags []string
+		if t.Tags == "" {
+			tags = []string{}
+		} else {
+			tags = strings.Split(t.Tags, ", ")
+		}
 		torrent := config.Torrent{
 			Hash:            t.Hash,
 			Name:            t.Name,
@@ -154,6 +160,7 @@ func (c *QBittorrent) GetTorrents() (map[string]config.Torrent, error) {
 			DownloadedBytes: int64(td.TotalDownloaded),
 			State:           string(t.State),
 			Files:           files,
+			Tags:            tags,
 			Downloaded: !sliceutils.StringSliceContains([]string{
 				"downloading",
 				"stalledDL",
@@ -286,4 +293,78 @@ func (c *QBittorrent) ShouldRelabel(t *config.Torrent) (string, bool, error) {
 	}
 
 	return "", false, nil
+}
+
+func (c *QBittorrent) ShouldRetag(t *config.Torrent) (RetagInfo, bool, error) {
+	var retagInfo = RetagInfo{}
+
+	for _, tag := range c.exp.Tags {
+		// check update
+		match, err := expression.CheckTorrentAllMatch(t, tag.Updates)
+		if err != nil {
+			return RetagInfo{}, false, fmt.Errorf("check update expression: %v: %w", t.Hash, err)
+		}
+
+		var containTag = sliceutils.StringSliceContains(t.Tags, tag.Name, false)
+		var tagMode = tag.Mode
+
+		if containTag && !match && (tagMode == "remove" || tagMode == "full") {
+			// we should remove the tag
+			retagInfo.Remove = append(retagInfo.Remove, tag.Name)
+		}
+		if !containTag && match && (tagMode == "add" || tagMode == "full") {
+			// we should add the tag
+			retagInfo.Add = append(retagInfo.Add, tag.Name)
+		}
+	}
+
+	return retagInfo, len(retagInfo.Add) != 0 || len(retagInfo.Remove) != 0, nil
+}
+
+func (c *QBittorrent) AddTags(hash string, tags []string) error {
+	if len(tags) == 0 {
+		return nil
+	}
+
+	if err := c.client.Torrent.AddTags([]string{hash}, tags); err != nil {
+		return fmt.Errorf("add torrent tags: %v: %w", tags, err)
+	}
+
+	return nil
+}
+
+func (c *QBittorrent) RemoveTags(hash string, tags []string) error {
+	if len(tags) == 0 {
+		return nil
+	}
+
+	if err := c.client.Torrent.RemoveTags([]string{hash}, tags); err != nil {
+		return fmt.Errorf("add torrent tags: %v: %w", tags, err)
+	}
+
+	return nil
+}
+
+func (c *QBittorrent) CreateTags(tags []string) error {
+	if len(tags) == 0 {
+		return nil
+	}
+
+	if err := c.client.Torrent.CreateTags(tags); err != nil {
+		return fmt.Errorf("create torrent tags: %v: %w", tags, err)
+	}
+
+	return nil
+}
+
+func (c *QBittorrent) DeleteTags(tags []string) error {
+	if len(tags) == 0 {
+		return nil
+	}
+
+	if err := c.client.Torrent.DeleteTags(tags); err != nil {
+		return fmt.Errorf("delete torrent tags: %v: %w", tags, err)
+	}
+
+	return nil
 }
