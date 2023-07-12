@@ -11,9 +11,10 @@ import (
 )
 
 type Configuration struct {
-	Clients  map[string]map[string]interface{}
-	Filters  map[string]FilterConfiguration
-	Trackers tracker.Config
+	Clients               map[string]map[string]interface{}
+	Filters               map[string]FilterConfiguration
+	Trackers              tracker.Config
+	TorrentRetentionLimit int
 }
 
 /* Vars */
@@ -39,6 +40,12 @@ func Init(configFilePath string) error {
 	if err := K.Load(file.Provider(configFilePath), yaml.Parser()); err != nil {
 		return fmt.Errorf("load: %w", err)
 	}
+
+	// Initialize Config
+	Config = &Configuration{}
+
+	// Load torrent_retention_limit separately.
+	Config.TorrentRetentionLimit = K.Int("torrent_retention_limit")
 
 	// unmarshal config
 	if err := K.Unmarshal("", &Config); err != nil {
