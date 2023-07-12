@@ -77,6 +77,8 @@ filters:
           - TrackerName == "landof.tv"
           - not (Name contains "1080p")
           - len(Files) >= 3
+# determines the number of torrents that should be retained in the client before the removal process begins
+torrent_retention_limit: 0 
 ```
 ## Optional - Tracker Configuration
 ```yaml
