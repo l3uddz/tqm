@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"sort"
 	"time"
 
 	"github.com/dustin/go-humanize"
@@ -75,6 +76,11 @@ func relabelEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map
 	return nil
 }
 
+type HashTorrentPair struct {
+	Hash    string
+	Torrent config.Torrent
+}
+
 // remove torrents that meet remove filters
 func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[string]config.Torrent,
 	tfm *torrentfilemap.TorrentFileMap) error {
@@ -84,9 +90,29 @@ func removeEligibleTorrents(log *logrus.Entry, c client.Interface, torrents map[
 	hardRemoveTorrents := 0
 	errorRemoveTorrents := 0
 	var removedTorrentBytes int64 = 0
+	torrentRetentionLimit := config.Config.TorrentRetentionLimit
+
+	// Create a slice from the map:
+	hashTorrentPairs := make([]HashTorrentPair, 0, len(torrents))
+	for h, t := range torrents {
+		hashTorrentPairs = append(hashTorrentPairs, HashTorrentPair{Hash: h, Torrent: t})
+	}
+
+	// Sort the slice by AddedSeconds:
+	sort.Slice(hashTorrentPairs, func(i, j int) bool {
+		return hashTorrentPairs[i].Torrent.AddedSeconds < hashTorrentPairs[j].Torrent.AddedSeconds
+	})
 
 	// iterate torrents
-	for h, t := range torrents {
+	for i, pair := range hashTorrentPairs {
+		h := pair.Hash
+		t := pair.Torrent
+
+		if i < torrentRetentionLimit {
+			// Skip this torrent, it's within the retention limit
+			continue
+		}
+
 		// should we ignore this torrent?
 		ignore, err := c.ShouldIgnore(&t)
 		if err != nil {
